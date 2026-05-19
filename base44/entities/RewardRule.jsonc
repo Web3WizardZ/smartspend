@@ -1,0 +1,93 @@
+{
+  "name": "RewardRule",
+  "type": "object",
+  "properties": {
+    "programme_id": {
+      "type": "string",
+      "description": "RewardProgramme ID"
+    },
+    "programme_name": {
+      "type": "string"
+    },
+    "retailer_id": {
+      "type": "string",
+      "description": "Specific retailer or empty for category-wide"
+    },
+    "retailer_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "reward_type": {
+      "type": "string",
+      "enum": [
+        "cashback",
+        "points",
+        "discount",
+        "miles",
+        "estimate"
+      ]
+    },
+    "estimated_rate_percent": {
+      "type": "number",
+      "description": "Estimated reward as % of spend"
+    },
+    "point_value_rand": {
+      "type": "number",
+      "description": "Estimated rand value per point"
+    },
+    "min_spend": {
+      "type": "number"
+    },
+    "max_spend": {
+      "type": "number"
+    },
+    "cap_amount": {
+      "type": "number"
+    },
+    "cap_period": {
+      "type": "string",
+      "enum": [
+        "monthly",
+        "quarterly",
+        "annual",
+        "none"
+      ]
+    },
+    "tier_required": {
+      "type": "string"
+    },
+    "conditions_note": {
+      "type": "string"
+    },
+    "exclusions_note": {
+      "type": "string"
+    },
+    "confidence_default": {
+      "type": "string",
+      "enum": [
+        "High",
+        "Medium",
+        "Low"
+      ],
+      "default": "Medium"
+    },
+    "source_reference": {
+      "type": "string"
+    },
+    "last_reviewed_at": {
+      "type": "string",
+      "format": "date"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "programme_id",
+    "reward_type",
+    "estimated_rate_percent"
+  ]
+}

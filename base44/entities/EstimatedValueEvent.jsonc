@@ -1,0 +1,35 @@
+{
+  "name": "EstimatedValueEvent",
+  "type": "object",
+  "properties": {
+    "recommendation_id": {
+      "type": "string"
+    },
+    "retailer_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "payment_profile_name": {
+      "type": "string"
+    },
+    "loyalty_card_name": {
+      "type": "string"
+    },
+    "user_confirmed_used": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "amount",
+    "estimated_value"
+  ]
+}

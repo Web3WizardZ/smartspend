@@ -1,0 +1,52 @@
+{
+  "name": "PaymentProfile",
+  "type": "object",
+  "properties": {
+    "bank_name": {
+      "type": "string"
+    },
+    "product_tier": {
+      "type": "string",
+      "description": "e.g. Gold, Premier, Private"
+    },
+    "reward_programme": {
+      "type": "string",
+      "description": "e.g. eBucks, Discovery Miles"
+    },
+    "reward_programme_id": {
+      "type": "string"
+    },
+    "reward_level": {
+      "type": "string",
+      "description": "e.g. Level 4, Gold tier"
+    },
+    "reward_level_known": {
+      "type": "boolean",
+      "default": false
+    },
+    "nickname": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "initials": {
+      "type": "string"
+    },
+    "brand_colour": {
+      "type": "string"
+    },
+    "confidence_level": {
+      "type": "string",
+      "enum": [
+        "High",
+        "Medium",
+        "Low"
+      ],
+      "default": "Medium"
+    }
+  },
+  "required": [
+    "bank_name"
+  ]
+}

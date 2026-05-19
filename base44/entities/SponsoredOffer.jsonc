@@ -1,0 +1,47 @@
+{
+  "name": "SponsoredOffer",
+  "type": "object",
+  "properties": {
+    "partner_name": {
+      "type": "string"
+    },
+    "retailer_id": {
+      "type": "string"
+    },
+    "programme_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "label": {
+      "type": "string",
+      "enum": [
+        "Sponsored",
+        "Featured Partner"
+      ]
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "tracking_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "partner_name",
+    "title"
+  ]
+}

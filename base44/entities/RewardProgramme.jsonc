@@ -1,0 +1,44 @@
+{
+  "name": "RewardProgramme",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "bank",
+        "loyalty",
+        "retailer",
+        "fuel",
+        "other"
+      ]
+    },
+    "provider": {
+      "type": "string",
+      "description": "Bank or retailer that runs this programme"
+    },
+    "description": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "initials": {
+      "type": "string"
+    },
+    "brand_colour": {
+      "type": "string"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "type",
+    "provider"
+  ]
+}

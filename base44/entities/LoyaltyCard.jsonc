@@ -1,0 +1,52 @@
+{
+  "name": "LoyaltyCard",
+  "type": "object",
+  "properties": {
+    "programme_name": {
+      "type": "string"
+    },
+    "programme_id": {
+      "type": "string"
+    },
+    "retailer_name": {
+      "type": "string"
+    },
+    "retailer_id": {
+      "type": "string"
+    },
+    "membership_number": {
+      "type": "string"
+    },
+    "barcode_value": {
+      "type": "string"
+    },
+    "barcode_type": {
+      "type": "string",
+      "enum": [
+        "CODE128",
+        "EAN13",
+        "QR",
+        "other"
+      ],
+      "default": "CODE128"
+    },
+    "nickname": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "logo_url": {
+      "type": "string"
+    },
+    "initials": {
+      "type": "string"
+    },
+    "brand_colour": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "programme_name"
+  ]
+}

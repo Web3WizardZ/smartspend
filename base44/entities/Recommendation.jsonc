@@ -1,0 +1,108 @@
+{
+  "name": "Recommendation",
+  "type": "object",
+  "properties": {
+    "session_id": {
+      "type": "string"
+    },
+    "retailer_id": {
+      "type": "string"
+    },
+    "retailer_name": {
+      "type": "string"
+    },
+    "category": {
+      "type": "string"
+    },
+    "amount": {
+      "type": "number"
+    },
+    "amount_band": {
+      "type": "string"
+    },
+    "best_payment_profile_id": {
+      "type": "string"
+    },
+    "best_payment_profile_name": {
+      "type": "string"
+    },
+    "best_loyalty_card_id": {
+      "type": "string"
+    },
+    "best_loyalty_card_name": {
+      "type": "string"
+    },
+    "estimated_value": {
+      "type": "number"
+    },
+    "estimated_value_percentage": {
+      "type": "number"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "High",
+        "Medium",
+        "Low"
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "options": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "payment_profile_id": {
+            "type": "string"
+          },
+          "payment_profile_name": {
+            "type": "string"
+          },
+          "loyalty_card_id": {
+            "type": "string"
+          },
+          "loyalty_card_name": {
+            "type": "string"
+          },
+          "programme_name": {
+            "type": "string"
+          },
+          "estimated_value": {
+            "type": "number"
+          },
+          "confidence": {
+            "type": "string"
+          },
+          "rank": {
+            "type": "number"
+          },
+          "reason_codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "missing_programmes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "user_confirmed_used": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "retailer_name",
+    "amount"
+  ]
+}
