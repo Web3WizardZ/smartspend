@@ -26,6 +26,25 @@
     "user_confirmed_used": {
       "type": "boolean",
       "default": true
+    },
+    "g_reward_amount": {
+      "type": "number",
+      "default": 0,
+      "description": "G$ earned from GoodDollar campaign rewards for this spend action"
+    },
+    "g_campaign_name": {
+      "type": "string",
+      "description": "The GoodDollar campaign that generated this G$ reward"
+    },
+    "g_reward_source": {
+      "type": "string",
+      "enum": [
+        "campaign",
+        "ubi_boost",
+        "none"
+      ],
+      "default": "none",
+      "description": "Source of the G$ reward"
     }
   },
   "required": [

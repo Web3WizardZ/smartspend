@@ -7,6 +7,7 @@ import AppHeader from '../components/shared/AppHeader';
 import Disclaimer from '../components/shared/Disclaimer';
 import LogoAvatar from '../components/shared/LogoAvatar';
 import GBoostResultCard from '../components/gooddollar/GBoostResultCard';
+import { useGoodDollar } from '@/context/GoodDollarContext';
 
 export default function Result() {
   const navigate = useNavigate();
@@ -17,10 +18,13 @@ export default function Result() {
   const amount = parseFloat(urlParams.get('amount'));
   const amountBand = urlParams.get('amount_band');
 
+  const { profile, isActivated } = useGoodDollar();
+
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showWhy, setShowWhy] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [gRewardEarned, setGRewardEarned] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -65,6 +69,12 @@ export default function Result() {
 
   const handleConfirmUsed = async () => {
     setConfirmed(true);
+
+    // Determine G$ reward for this spend action (campaign-based, 5 G$ per confirmed spend comparison)
+    const isEligibleForGReward = isActivated && profile?.identity_status === 'verified';
+    const gAmount = isEligibleForGReward ? 5 : 0;
+    setGRewardEarned(gAmount);
+
     if (isAuthenticated && result?.best_combo) {
       await base44.entities.EstimatedValueEvent.create({
         retailer_name: retailerName,
@@ -74,9 +84,20 @@ export default function Result() {
         payment_profile_name: result.best_combo.payment_profile_name,
         loyalty_card_name: result.best_combo.loyalty_card_name,
         user_confirmed_used: true,
+        g_reward_amount: gAmount,
+        g_campaign_name: isEligibleForGReward ? 'Smart Grocery Challenge' : null,
+        g_reward_source: isEligibleForGReward ? 'campaign' : 'none',
       });
+
+      // Update G$ balance in profile if reward was earned
+      if (gAmount > 0 && profile?.id) {
+        await base44.entities.GoodDollarProfile.update(profile.id, {
+          g_balance: (profile.g_balance || 0) + gAmount,
+          last_synced_at: new Date().toISOString(),
+        });
+      }
     }
-    base44.analytics.track({ eventName: 'used_combo_clicked', properties: { retailer_name: retailerName, amount, estimated_value: result?.estimated_value } });
+    base44.analytics.track({ eventName: 'used_combo_clicked', properties: { retailer_name: retailerName, amount, estimated_value: result?.estimated_value, g_reward_amount: gAmount } });
   };
 
   if (loading) {
@@ -212,7 +233,9 @@ export default function Result() {
                 onClick={handleConfirmUsed}
                 disabled={confirmed}
               >
-                {confirmed ? 'Tracked ✓' : 'I used this combo'}
+                {confirmed
+                  ? gRewardEarned > 0 ? `+G$ ${gRewardEarned} Earned ✓` : 'Tracked ✓'
+                  : 'I used this combo'}
               </Button>
             </div>
           </>
