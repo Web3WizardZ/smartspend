@@ -22,6 +22,9 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminRetailers from './pages/admin/AdminRetailers';
 import AdminProgrammes from './pages/admin/AdminProgrammes';
 import AdminRules from './pages/admin/AdminRules';
+import GoodDollarActivation from './pages/GoodDollarActivation';
+import Campaigns from './pages/Campaigns';
+import { GoodDollarProvider } from './context/GoodDollarContext';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -64,6 +67,8 @@ const AuthenticatedApp = () => {
       <Route path="/add-payment-profile" element={<AddPaymentProfile />} />
       <Route path="/add-loyalty-card" element={<AddLoyaltyCard />} />
       <Route path="/smartspend-plus" element={<SmartSpendPlus />} />
+      <Route path="/gooddollar-activation" element={<GoodDollarActivation />} />
+      <Route path="/campaigns" element={<Campaigns />} />
 
       {/* Admin */}
       <Route path="/admin" element={<AdminDashboard />} />
@@ -81,7 +86,9 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <AuthenticatedApp />
+          <GoodDollarProvider>
+            <AuthenticatedApp />
+          </GoodDollarProvider>
         </Router>
         <Toaster />
       </QueryClientProvider>

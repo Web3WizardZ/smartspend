@@ -6,6 +6,7 @@ import { Check, ChevronDown, ChevronUp, Info, AlertCircle } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
 import Disclaimer from '../components/shared/Disclaimer';
 import LogoAvatar from '../components/shared/LogoAvatar';
+import GBoostResultCard from '../components/gooddollar/GBoostResultCard';
 
 export default function Result() {
   const navigate = useNavigate();
@@ -166,6 +167,9 @@ export default function Result() {
                 ))}
               </div>
             )}
+
+            {/* G$ Boost */}
+            <GBoostResultCard retailerName={retailerName} category={category} />
 
             {/* Missing programmes */}
             {result.missing_programmes?.length > 0 && (

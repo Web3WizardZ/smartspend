@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { UserCircle, Shield, Bell, LogOut, Crown, ChevronRight } from 'lucide-react';
+import { UserCircle, Shield, Bell, LogOut, Crown, ChevronRight, Zap } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
 import { useNavigate } from 'react-router-dom';
+import { useGoodDollar } from '@/context/GoodDollarContext';
 
 const LOGO_URL = "https://media.base44.com/images/public/user_69ea57333f824d48a1afdd12/e7314e200_image.png";
 
@@ -13,6 +14,7 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [isAuth, setIsAuth] = useState(false);
   const [checking, setChecking] = useState(true);
+  const { isActivated, profile, shortAddress } = useGoodDollar();
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(async (a) => {
@@ -58,6 +60,28 @@ export default function Profile() {
               <p className="text-xs text-muted-foreground">{user?.email}</p>
             </div>
           </div>
+        </div>
+
+        {/* GoodDollar Rewards status */}
+        <div
+          onClick={() => navigate(isActivated ? '/gooddollar-activation' : '/gooddollar-activation')}
+          className={`rounded-2xl p-4 mb-4 flex items-center gap-3 cursor-pointer border transition-all
+            ${isActivated ? 'bg-primary/5 border-primary/20' : 'bg-muted border-border'}`}
+        >
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isActivated ? 'bg-primary/15' : 'bg-muted-foreground/10'}`}>
+            <Zap className={`w-5 h-5 ${isActivated ? 'text-primary' : 'text-muted-foreground'}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-foreground">
+              {isActivated ? 'GoodDollar Rewards active' : 'GoodDollar Rewards'}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isActivated
+                ? `G$ ${profile?.g_balance?.toFixed(2) || '0.00'} · ${profile?.identity_status === 'verified' ? 'Verified ✓' : 'Identity not verified'}`
+                : 'Activate to unlock G$ boosts and campaign rewards'}
+            </p>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
 
         {/* SmartSpend+ */}

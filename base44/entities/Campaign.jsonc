@@ -1,0 +1,56 @@
+{
+  "name": "Campaign",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "action_type": {
+      "type": "string"
+    },
+    "reward_pool_g": {
+      "type": "number",
+      "default": 0
+    },
+    "reward_per_action_g": {
+      "type": "number",
+      "default": 0
+    },
+    "sponsor": {
+      "type": "string"
+    },
+    "participants": {
+      "type": "number",
+      "default": 0
+    },
+    "actions_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "requires_identity_verification": {
+      "type": "boolean",
+      "default": false
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    },
+    "end_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "category": {
+      "type": "string"
+    },
+    "image_url": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "action_type"
+  ]
+}

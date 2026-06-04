@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import StoreChip from '../components/spend/StoreChip';
+import GBoostBanner from '../components/gooddollar/GBoostBanner';
 
 const LOGO_URL = "https://media.base44.com/images/public/user_69ea57333f824d48a1afdd12/e7314e200_image.png";
 
@@ -40,7 +41,12 @@ export default function Spend() {
           <p className="text-[11px] text-primary/70 font-medium mb-6">Know what to pay with. Know what to scan.</p>
 
           <h2 className="text-2xl font-bold text-foreground mb-1">Where are you spending?</h2>
-          <p className="text-sm text-muted-foreground mb-6">Check your best estimated rewards combo before you pay.</p>
+          <p className="text-sm text-muted-foreground mb-4">Check your best estimated rewards combo before you pay.</p>
+
+          {/* G$ Boost banner */}
+          <div className="mb-5">
+            <GBoostBanner />
+          </div>
 
           {/* Search */}
           <div className="relative">

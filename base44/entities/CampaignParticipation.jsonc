@@ -1,0 +1,48 @@
+{
+  "name": "CampaignParticipation",
+  "type": "object",
+  "properties": {
+    "campaign_id": {
+      "type": "string"
+    },
+    "user_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "joined",
+        "in_progress",
+        "completed",
+        "reward_pending",
+        "reward_claimed"
+      ],
+      "default": "joined"
+    },
+    "actions_completed": {
+      "type": "number",
+      "default": 0
+    },
+    "reward_eligibility": {
+      "type": "string",
+      "enum": [
+        "not_eligible",
+        "pending",
+        "eligible",
+        "claimed"
+      ],
+      "default": "not_eligible"
+    },
+    "g_reward_amount": {
+      "type": "number",
+      "default": 0
+    },
+    "completed_at": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "campaign_id",
+    "user_id"
+  ]
+}

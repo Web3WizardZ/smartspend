@@ -1,7 +1,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Check, Crown, TrendingUp, Bell, BarChart3, Heart, Zap } from 'lucide-react';
+import { Check, Crown, TrendingUp, Bell, BarChart3, Heart, Zap, Trophy, Users, Shield } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
+import { useNavigate } from 'react-router-dom';
 
 const LOGO_URL = "https://media.base44.com/images/public/user_69ea57333f824d48a1afdd12/e7314e200_image.png";
 
@@ -12,9 +13,13 @@ const FEATURES = [
   { icon: Heart, label: 'Favourite stores' },
   { icon: Zap, label: 'Deeper SpendIQ insights' },
   { icon: Crown, label: 'Cap and tier awareness notes' },
+  { icon: Trophy, label: 'GoodDollar-powered community campaigns' },
+  { icon: Shield, label: 'G$ Boost rewards for verified actions' },
+  { icon: Users, label: 'Community rewards and local merchant support' },
 ];
 
 export default function SmartSpendPlus() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background">
       <AppHeader showBack title="" />
@@ -59,9 +64,24 @@ export default function SmartSpendPlus() {
         <Button className="w-full h-14 rounded-2xl text-base font-bold mb-3">
           Start SmartSpend+
         </Button>
-        <p className="text-[11px] text-muted-foreground text-center">
+        <p className="text-[11px] text-muted-foreground text-center mb-6">
           Cancel anytime. No commitments.
         </p>
+
+        {/* GoodDollar campaigns shortcut */}
+        <div
+          onClick={() => navigate('/campaigns')}
+          className="bg-gradient-to-br from-primary/8 to-primary/4 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 cursor-pointer hover:from-primary/12 transition-all"
+        >
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+            <Trophy className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-bold text-foreground">GoodDollar Campaigns</p>
+            <p className="text-xs text-muted-foreground">Earn G$ rewards for smart spending actions</p>
+          </div>
+          <span className="text-xs text-primary font-semibold">View →</span>
+        </div>
       </div>
     </div>
   );

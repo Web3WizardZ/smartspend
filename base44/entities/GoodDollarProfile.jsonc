@@ -1,0 +1,69 @@
+{
+  "name": "GoodDollarProfile",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string"
+    },
+    "wallet_address": {
+      "type": "string"
+    },
+    "wallet_type": {
+      "type": "string",
+      "enum": [
+        "embedded",
+        "external"
+      ],
+      "default": "embedded"
+    },
+    "activation_status": {
+      "type": "string",
+      "enum": [
+        "inactive",
+        "pending",
+        "active",
+        "failed"
+      ],
+      "default": "inactive"
+    },
+    "g_balance": {
+      "type": "number",
+      "default": 0
+    },
+    "identity_status": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "unverified",
+        "verified",
+        "failed"
+      ],
+      "default": "unknown"
+    },
+    "ubi_claim_status": {
+      "type": "string",
+      "enum": [
+        "unknown",
+        "available",
+        "claimed",
+        "not_eligible"
+      ],
+      "default": "unknown"
+    },
+    "last_synced_at": {
+      "type": "string"
+    },
+    "celo_network_status": {
+      "type": "string",
+      "enum": [
+        "disconnected",
+        "connected",
+        "error"
+      ],
+      "default": "disconnected"
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}

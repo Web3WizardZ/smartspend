@@ -3,15 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Plus, ChevronRight, CreditCard, Barcode } from 'lucide-react';
+import { Plus, ChevronRight, CreditCard, Barcode, Zap } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
 import LogoAvatar from '../components/shared/LogoAvatar';
+import GoodDollarActivationCard from '../components/gooddollar/GoodDollarActivationCard';
+import { useGoodDollar } from '@/context/GoodDollarContext';
 
 export default function Wallet() {
   const navigate = useNavigate();
   const urlParams = new URLSearchParams(window.location.search);
-  const initialTab = urlParams.get('tab') === 'loyalty' ? 'loyalty' : 'payment';
+  const initialTab = urlParams.get('tab') === 'loyalty' ? 'loyalty' : urlParams.get('tab') === 'gooddollar' ? 'gooddollar' : 'payment';
   const [tab, setTab] = useState(initialTab);
+  const { isActivated, activate, activating } = useGoodDollar();
   const [isAuth, setIsAuth] = useState(false);
   const [checking, setChecking] = useState(true);
 
@@ -52,24 +55,32 @@ export default function Wallet() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader title="Wallet" rightAction={
-        <Button variant="ghost" size="sm" className="text-primary text-xs font-semibold" onClick={() => navigate(tab === 'payment' ? '/add-payment-profile' : '/add-loyalty-card')}>
-          <Plus className="w-4 h-4 mr-1" /> Add new
-        </Button>
+        tab !== 'gooddollar' ? (
+          <Button variant="ghost" size="sm" className="text-primary text-xs font-semibold" onClick={() => navigate(tab === 'payment' ? '/add-payment-profile' : '/add-loyalty-card')}>
+            <Plus className="w-4 h-4 mr-1" /> Add new
+          </Button>
+        ) : null
       } />
       <div className="max-w-lg mx-auto px-6 pt-4 pb-8">
         {/* Tabs */}
         <div className="flex gap-1 bg-muted rounded-2xl p-1 mb-6">
           <button
             onClick={() => setTab('payment')}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === 'payment' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'}`}
+            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${tab === 'payment' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'}`}
           >
-            Payment profiles
+            Payment
           </button>
           <button
             onClick={() => setTab('loyalty')}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all ${tab === 'loyalty' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'}`}
+            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${tab === 'loyalty' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'}`}
           >
-            Loyalty cards
+            Loyalty
+          </button>
+          <button
+            onClick={() => setTab('gooddollar')}
+            className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 ${tab === 'gooddollar' ? 'bg-white text-foreground shadow-sm' : 'text-muted-foreground'}`}
+          >
+            <Zap className="w-3 h-3" /> G$
           </button>
         </div>
 
@@ -98,6 +109,21 @@ export default function Wallet() {
               </div>
             )}
           </>
+        )}
+
+        {tab === 'gooddollar' && (
+          <div className="space-y-4">
+            <GoodDollarActivationCard onActivate={activate} />
+            {isActivated && (
+              <Button
+                variant="outline"
+                className="w-full h-12 rounded-2xl text-sm"
+                onClick={() => navigate('/campaigns')}
+              >
+                <Zap className="w-4 h-4 mr-2 text-primary" /> Explore campaigns
+              </Button>
+            )}
+          </div>
         )}
 
         {tab === 'loyalty' && (
