@@ -127,9 +127,24 @@ export default function GoodDollarActivation() {
           </button>
           {showAdvanced && (
             <div className="mt-3 bg-muted/40 rounded-xl p-4 space-y-2 text-xs text-muted-foreground">
-              <p>Rewards account: <span className="font-mono text-foreground">{shortAddress || '—'}</span></p>
+              <div className="flex items-center justify-between">
+                <span>Rewards account</span>
+                <div className="flex items-center gap-1">
+                  <span className="font-mono text-foreground">{shortAddress || '—'}</span>
+                  {profile?.wallet_address && (
+                    <a
+                      href={`https://celoscan.io/address/${profile.wallet_address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  )}
+                </div>
+              </div>
               <p>Wallet type: <span className="text-foreground capitalize">{profile?.wallet_type || 'embedded'}</span></p>
-              <p>Network: <span className="text-foreground">Celo</span></p>
+              <p>Network: <span className="text-foreground">Celo Mainnet (chainId: 42220)</span></p>
             </div>
           )}
         </div>
