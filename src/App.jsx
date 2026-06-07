@@ -25,6 +25,10 @@ import AdminRules from './pages/admin/AdminRules';
 import GoodDollarActivation from './pages/GoodDollarActivation';
 import Campaigns from './pages/Campaigns';
 import { GoodDollarProvider } from './context/GoodDollarContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -73,6 +77,11 @@ const AuthenticatedApp = () => {
       <Route path="/admin/retailers" element={<AdminRetailers />} />
       <Route path="/admin/programmes" element={<AdminProgrammes />} />
       <Route path="/admin/rules" element={<AdminRules />} />
+
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
