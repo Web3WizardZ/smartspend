@@ -11,17 +11,40 @@ export function GoodDollarProvider({ children }) {
   const [syncing, setSyncing] = useState(false);
   const [activating, setActivating] = useState(false);
 
-  // Load profile from DB for the current user
+  // Load profile from DB for the current user.
+  // On first login, auto-creates a Celo wallet and GoodDollarProfile.
   const loadProfile = useCallback(async () => {
     const authed = await base44.auth.isAuthenticated();
     if (!authed) return;
     const me = await base44.auth.me();
+
+    // Always ensure a wallet exists for authenticated users
+    const w = await createWalletForUser(me.id);
+    setWallet(w);
+
     const profiles = await base44.entities.GoodDollarProfile.filter({ user_id: me.id });
     if (profiles.length > 0) {
-      setProfile(profiles[0]);
-      // Also load wallet from local storage
-      const w = await getWalletForUser(me.id);
-      setWallet(w);
+      // Sync wallet address if it changed (e.g. user re-installs)
+      const p = profiles[0];
+      if (!p.wallet_address && w?.walletAddress) {
+        const updated = await base44.entities.GoodDollarProfile.update(p.id, {
+          wallet_address: w.walletAddress,
+          wallet_type: w.walletType,
+        });
+        setProfile(updated);
+      } else {
+        setProfile(p);
+      }
+    } else {
+      // First login: create a profile with the new wallet (inactive until user activates G$)
+      const created = await base44.entities.GoodDollarProfile.create({
+        user_id: me.id,
+        wallet_address: w.walletAddress,
+        wallet_type: w.walletType,
+        activation_status: 'inactive',
+        celo_network_status: 'connected',
+      });
+      setProfile(created);
     }
   }, []);
 
