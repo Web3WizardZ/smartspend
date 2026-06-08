@@ -62,12 +62,17 @@ export function GoodDollarProvider({ children }) {
     const w = await createWalletForUser(me.id);
     setWallet(w);
 
-    // Step 2: Fetch on-chain data
-    const [balance, identity, ubi] = await Promise.all([
-      getGBalance(w.walletAddress),
-      getIdentityStatus(w.walletAddress),
-      getUBIClaimStatus(w.walletAddress),
-    ]);
+    // Step 2: Fetch on-chain data (best-effort — don't fail activation if RPC is down)
+    let balance = 0, identity = 'unknown', ubi = 'unknown';
+    try {
+      [balance, identity, ubi] = await Promise.all([
+        getGBalance(w.walletAddress),
+        getIdentityStatus(w.walletAddress),
+        getUBIClaimStatus(w.walletAddress),
+      ]);
+    } catch (e) {
+      console.warn('GoodDollar on-chain sync failed (non-fatal):', e.message);
+    }
 
     // Step 3: Upsert GoodDollarProfile entity
     const existing = await base44.entities.GoodDollarProfile.filter({ user_id: me.id });
@@ -102,11 +107,18 @@ export function GoodDollarProvider({ children }) {
   const sync = useCallback(async () => {
     if (!profile?.wallet_address) return;
     setSyncing(true);
-    const [balance, identity, ubi] = await Promise.all([
-      getGBalance(profile.wallet_address),
-      getIdentityStatus(profile.wallet_address),
-      getUBIClaimStatus(profile.wallet_address),
-    ]);
+    let balance = profile.g_balance || 0, identity = profile.identity_status || 'unknown', ubi = profile.ubi_claim_status || 'unknown';
+    try {
+      [balance, identity, ubi] = await Promise.all([
+        getGBalance(profile.wallet_address),
+        getIdentityStatus(profile.wallet_address),
+        getUBIClaimStatus(profile.wallet_address),
+      ]);
+    } catch (e) {
+      console.warn('GoodDollar sync failed:', e.message);
+      setSyncing(false);
+      return;
+    }
     const updated = await base44.entities.GoodDollarProfile.update(profile.id, {
       g_balance: balance,
       identity_status: identity,
