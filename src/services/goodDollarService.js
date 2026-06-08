@@ -1,5 +1,5 @@
 /**
- * GoodDollar Service — Celo Mainnet
+ * GoodDollar Service — Celo Mainnet (Frontend)
  *
  * Uses public Celo Mainnet RPC (forno.celo.org) to read live on-chain data.
  * G$ token: 0x62B8B11039FcfE5aB0C56E502b1C372A3d462a4b (Celo Mainnet)
@@ -88,4 +88,9 @@ export async function checkRewardEligibility(walletAddress, actionId, identitySt
 
 function isValidAddress(addr) {
   return /^0x[0-9a-fA-F]{40}$/.test(addr);
+}
+
+export function formatAddress(address) {
+  if (!address || address.length < 10) return address;
+  return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
