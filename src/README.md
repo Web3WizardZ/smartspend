@@ -4,31 +4,44 @@
 
 SmartSpend helps you compare payment profiles and loyalty programmes to find the highest estimated reward value before you spend.
 
-## Features
+## About
 
-- **Smart Recommendations**: Get personalized payment and loyalty card combinations for maximum rewards
-- **GoodDollar Integration**: Connect your GoodDollar wallet and earn G$ rewards through campaigns
-- **Multi-Country Support**: Available in South Africa, Kenya, and more
-- **Real-time Analytics**: Track your spending and optimize your rewards
+View and Edit your app on [Base44.com](https://base44.com)
 
-## Getting Started
+This project contains everything you need to run your app locally.
 
-1. Visit [smartspend.tech](https://smartspend.tech)
-2. Create an account or continue as a guest
-3. Add your payment profiles and loyalty cards
-4. Search for a retailer and enter your spend amount
-5. Get the best recommended combination for maximum rewards
+## Edit the code in your local development environment
 
-## Technology Stack
+Any change pushed to the repo will also be reflected in the Base44 Builder.
 
-- React + Vite
-- Tailwind CSS
-- Base44 Platform
-- Celo Blockchain (GoodDollar integration)
+### Prerequisites:
 
-## Support
+1. Clone the repository using the project's Git URL
+2. Navigate to the project directory
+3. Install dependencies: `npm install`
+4. Create an `.env.local` file and set the right environment variables:
 
-For questions or support, please contact us through the app or visit our help center.
+```
+VITE_BASE44_APP_ID=your_app_id
+VITE_BASE44_APP_BASE_URL=your_backend_url
+```
+
+e.g.
+```
+VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
+VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+```
+
+5. Run the app: `npm run dev`
+
+## Publish your changes
+
+Open [Base44.com](https://base44.com) and click on **Publish**.
+
+## Docs & Support
+
+- Documentation: https://docs.base44.com/Integrations/Using-GitHub
+- Support: https://app.base44.com/support
 
 ---
 
