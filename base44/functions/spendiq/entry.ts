@@ -28,7 +28,11 @@ Deno.serve(async (req) => {
 
   // Classify rules using the RewardProgramme.type field; "bank" = card-based, everything else = loyalty/retailer
   const bankRules = categoryRules.filter(r => progTypeMap[r.programme_id] === 'bank');
-  const loyaltyRules = categoryRules.filter(r => progTypeMap[r.programme_id] !== 'bank');
+  // For loyalty rules: include category-wide rules (no retailer_id) OR retailer-specific rules matching the current retailer
+  const loyaltyRules = categoryRules.filter(r => 
+    progTypeMap[r.programme_id] !== 'bank' &&
+    (!r.retailer_id || !retailer_id || r.retailer_id === retailer_id)
+  );
 
   // Check after country filtering if there are any relevant profiles
   const hasRelevantProfiles = !is_guest && payment_profiles?.length > 0 &&
@@ -38,7 +42,7 @@ Deno.serve(async (req) => {
     })();
 
   if (!hasRelevantProfiles) {
-    // Guest mode: show general estimates based on category rules
+    // Guest mode: show general estimates based on category rules (already filtered by country and retailer)
     const topBankRules = bankRules.sort((a, b) => b.estimated_rate_percent - a.estimated_rate_percent).slice(0, 4);
     const topLoyaltyRules = loyaltyRules.sort((a, b) => b.estimated_rate_percent - a.estimated_rate_percent).slice(0, 3);
 
@@ -96,11 +100,15 @@ Deno.serve(async (req) => {
     countryBankProgrammeNames.has(p.bank_name)
   );
 
-  // Only include loyalty cards that have rules in the target country
+  // Only include loyalty cards that have rules in the target country AND match the retailer (if retailer-specific)
   const countryLoyaltyProgrammeNames = new Set(loyaltyRules.map(r => r.programme_name));
-  const relevantCards = (loyalty_cards || []).filter(c =>
-    countryLoyaltyProgrammeNames.has(c.programme_name)
-  );
+  const relevantCards = (loyalty_cards || []).filter(c => {
+    // Must have rules in target country
+    if (!countryLoyaltyProgrammeNames.has(c.programme_name)) return false;
+    // If user's card is retailer-specific (retailer_id matches), only include if it matches the current retailer
+    if (c.retailer_id && retailer_id && c.retailer_id !== retailer_id) return false;
+    return true;
+  });
 
   let rank = 1;
   for (const profile of relevantProfiles) {
