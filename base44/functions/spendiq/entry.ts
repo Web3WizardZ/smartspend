@@ -30,7 +30,14 @@ Deno.serve(async (req) => {
   const bankRules = categoryRules.filter(r => progTypeMap[r.programme_id] === 'bank');
   const loyaltyRules = categoryRules.filter(r => progTypeMap[r.programme_id] !== 'bank');
 
-  if (is_guest || !payment_profiles || payment_profiles.length === 0) {
+  // Check after country filtering if there are any relevant profiles
+  const hasRelevantProfiles = !is_guest && payment_profiles?.length > 0 &&
+    (() => {
+      const names = new Set(bankRules.map(r => r.programme_name));
+      return payment_profiles.some(p => names.has(p.reward_programme) || names.has(p.bank_name));
+    })();
+
+  if (!hasRelevantProfiles) {
     // Guest mode: show general estimates based on category rules
     const topBankRules = bankRules.sort((a, b) => b.estimated_rate_percent - a.estimated_rate_percent).slice(0, 4);
     const topLoyaltyRules = loyaltyRules.sort((a, b) => b.estimated_rate_percent - a.estimated_rate_percent).slice(0, 3);
@@ -81,9 +88,22 @@ Deno.serve(async (req) => {
 
   // Signed-in user: calculate personalized combos
   const userLoyaltyNames = (loyalty_cards || []).map(lc => lc.programme_name);
-  
+
+  // Only include payment profiles that have at least one bank rule in the target country
+  const countryBankProgrammeNames = new Set(bankRules.map(r => r.programme_name));
+  const relevantProfiles = payment_profiles.filter(p =>
+    countryBankProgrammeNames.has(p.reward_programme) ||
+    countryBankProgrammeNames.has(p.bank_name)
+  );
+
+  // Only include loyalty cards that have rules in the target country
+  const countryLoyaltyProgrammeNames = new Set(loyaltyRules.map(r => r.programme_name));
+  const relevantCards = (loyalty_cards || []).filter(c =>
+    countryLoyaltyProgrammeNames.has(c.programme_name)
+  );
+
   let rank = 1;
-  for (const profile of payment_profiles) {
+  for (const profile of relevantProfiles) {
     // Find bank rules matching this profile's reward programme
     const matchingBankRules = bankRules.filter(r => 
       r.programme_name === profile.reward_programme || 
@@ -100,8 +120,8 @@ Deno.serve(async (req) => {
       ? ["PAYMENT_PROFILE_MATCH", "CATEGORY_MATCH"] 
       : ["CATEGORY_MATCH"];
 
-    // Combine with each loyalty card
-    for (const card of (loyalty_cards || [])) {
+    // Combine with each loyalty card (country-filtered)
+    for (const card of relevantCards) {
       const matchingLoyaltyRules = loyaltyRules.filter(r => r.programme_name === card.programme_name);
       const loyaltyRate = matchingLoyaltyRules.length > 0 
         ? Math.max(...matchingLoyaltyRules.map(r => r.estimated_rate_percent))
