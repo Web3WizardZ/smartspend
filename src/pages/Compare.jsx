@@ -8,12 +8,12 @@ import AppHeader from '../components/shared/AppHeader';
 import LogoAvatar from '../components/shared/LogoAvatar';
 
 const CATEGORIES = ['Groceries', 'Fuel', 'Pharmacy', 'Online Shopping', 'Restaurants', 'Clothing', 'General Retail'];
-const AMOUNTS = [500, 1000, 2000, 4000];
+const AMOUNTS = [50, 100, 250, 500];
 
 export default function Compare() {
   const navigate = useNavigate();
   const [category, setCategory] = useState('Groceries');
-  const [amount, setAmount] = useState(4000);
+  const [amount, setAmount] = useState(500);
 
   const { data: rules = [] } = useQuery({
     queryKey: ['rules-for-compare', category],
@@ -59,7 +59,7 @@ export default function Compare() {
         <div className="bg-white rounded-2xl border border-border p-4 mb-6">
           <p className="text-xs text-muted-foreground mb-1">Based on your average spend of</p>
           <div className="flex items-center gap-2">
-            <p className="text-2xl font-extrabold text-foreground">R{amount.toLocaleString()}</p>
+            <p className="text-2xl font-extrabold text-foreground">${amount.toLocaleString()}</p>
             <span className="text-sm text-muted-foreground">/ month</span>
           </div>
           <div className="flex gap-2 mt-3">
@@ -69,7 +69,7 @@ export default function Compare() {
                 onClick={() => setAmount(a)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${amount === a ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}
               >
-                R{a.toLocaleString()}
+                ${a.toLocaleString()}
               </button>
             ))}
           </div>
@@ -92,7 +92,7 @@ export default function Compare() {
                 <p className="text-xs text-muted-foreground">{est.programme?.provider}</p>
               </div>
               <p className="text-sm font-bold text-primary whitespace-nowrap">
-                R{est.monthlyMin} – R{est.monthlyMax}
+                ${est.monthlyMin} – ${est.monthlyMax}
               </p>
             </div>
           ))}

@@ -61,7 +61,7 @@ export default function Savings() {
         {/* Hero card */}
         <div className="bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-6 text-primary-foreground mb-4">
           <p className="text-sm font-medium opacity-90 mb-1">Estimated value tracked</p>
-          <p className="text-5xl font-extrabold mb-1">R{totalValue.toLocaleString()}</p>
+          <p className="text-5xl font-extrabold mb-1">${totalValue.toLocaleString()}</p>
           <p className="text-sm opacity-80">From {events.length} tracked purchases</p>
         </div>
 
@@ -114,10 +114,10 @@ export default function Savings() {
                 <div key={e.id} className="bg-white rounded-2xl border border-border p-4 flex items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-foreground">{e.retailer_name || 'Purchase'}</p>
-                    <p className="text-xs text-muted-foreground">{e.category} · R{e.amount?.toLocaleString()}</p>
+                    <p className="text-xs text-muted-foreground">{e.category} · ${e.amount?.toLocaleString()}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-sm font-bold text-primary">R{e.estimated_value}</p>
+                    <p className="text-sm font-bold text-primary">${e.estimated_value}</p>
                     {(e.g_reward_amount || 0) > 0 && (
                       <p className="text-xs font-semibold text-primary flex items-center justify-end gap-0.5 mt-0.5">
                         <Zap className="w-3 h-3" />G$ {e.g_reward_amount}

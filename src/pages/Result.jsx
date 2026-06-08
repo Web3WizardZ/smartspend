@@ -165,7 +165,7 @@ export default function Result() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground font-medium">Estimated total value</p>
-                  <p className="text-4xl font-extrabold text-primary">R{best.estimated_value}</p>
+                  <p className="text-4xl font-extrabold text-primary">${best.estimated_value}</p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${confColor[best.confidence] || confColor.Low}`}>
                   {best.confidence} confidence
