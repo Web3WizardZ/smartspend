@@ -18,7 +18,7 @@ const UBI_LABELS = {
 };
 
 export default function GoodDollarActivationCard({ onActivate, compact = false }) {
-  const { profile, isActivated, activating, syncing, shortAddress, sync } = useGoodDollar();
+  const { profile, isActivated, linking, syncing, shortAddress, sync } = useGoodDollar();
   const [expanded, setExpanded] = useState(false);
 
   if (!isActivated) {
@@ -37,12 +37,12 @@ export default function GoodDollarActivationCard({ onActivate, compact = false }
               size="sm"
               className="mt-3 rounded-xl h-9 text-xs font-semibold"
               onClick={onActivate}
-              disabled={activating}
+              disabled={linking}
             >
-              {activating ? (
-                <><RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Preparing…</>
+              {linking ? (
+                <><RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" /> Connecting…</>
               ) : (
-                <><Zap className="w-3.5 h-3.5 mr-1.5" /> Activate GoodDollar Rewards</>
+                <><Zap className="w-3.5 h-3.5 mr-1.5" /> Connect G$ account</>
               )}
             </Button>
           </div>

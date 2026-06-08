@@ -41,9 +41,9 @@ export default function GBoostBanner() {
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs font-bold text-foreground">Unlock G$ Boosts</p>
-        <p className="text-xs text-muted-foreground">Activate GoodDollar Rewards for verified rewards</p>
+        <p className="text-xs text-muted-foreground">Connect your GoodDollar account to earn daily rewards</p>
       </div>
-      <span className="text-xs text-primary font-semibold flex-shrink-0">Activate →</span>
+      <span className="text-xs text-primary font-semibold flex-shrink-0">Connect →</span>
     </div>
   );
 }

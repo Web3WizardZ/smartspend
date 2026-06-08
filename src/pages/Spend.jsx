@@ -1,17 +1,27 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import StoreChip from '../components/spend/StoreChip';
 import GBoostBanner from '../components/gooddollar/GBoostBanner';
+import GuestFeedbackPopup, { useGuestFeedbackTrigger } from '../components/gooddollar/GuestFeedbackPopup';
 
 const LOGO_URL = "https://media.base44.com/images/public/user_69ea57333f824d48a1afdd12/e7314e200_image.png";
 
 export default function Spend() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [search, setSearch] = useState('');
+  const { show: showFeedback, trigger: triggerFeedback, dismiss: dismissFeedback } = useGuestFeedbackTrigger();
+
+  // Trigger feedback popup when user returns from a result
+  useEffect(() => {
+    if (location.state?.fromResult) {
+      triggerFeedback();
+    }
+  }, [location.state, triggerFeedback]);
 
   const { data: retailers = [], isLoading } = useQuery({
     queryKey: ['retailers'],
@@ -31,6 +41,7 @@ export default function Spend() {
 
   return (
     <div className="min-h-screen bg-background">
+      {showFeedback && <GuestFeedbackPopup onDismiss={dismissFeedback} />}
       {/* Hero */}
       <div className="bg-white px-6 pt-10 pb-8">
         <div className="max-w-lg mx-auto">

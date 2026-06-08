@@ -121,7 +121,7 @@ export default function Result() {
 
   return (
     <div className="min-h-screen bg-background">
-      <AppHeader showBack title="Best combo for you" />
+      <AppHeader showBack title="Best combo for you" onBack={() => navigate('/', { state: { fromResult: true } })} />
       <div className="max-w-lg mx-auto px-6 pt-4 pb-8">
         {/* Best combo badge */}
         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-5">

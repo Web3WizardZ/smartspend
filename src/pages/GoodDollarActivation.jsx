@@ -1,174 +1,250 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Shield, TrendingUp, RefreshCw, CheckCircle2, XCircle, ChevronDown, ChevronUp, ExternalLink } from 'lucide-react';
+import { Zap, Shield, TrendingUp, CheckCircle2, XCircle, ExternalLink, ArrowRight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppHeader from '@/components/shared/AppHeader';
 import { useGoodDollar } from '@/context/GoodDollarContext';
 
-const STEPS = [
-  { key: 'wallet', label: 'Preparing your rewards account' },
-  { key: 'identity', label: 'Checking GoodDollar identity' },
-  { key: 'balance', label: 'Fetching G$ balance' },
-  { key: 'done', label: 'Rewards account ready' },
-];
+const IDENTITY_LABELS = {
+  unknown: { label: 'Not checked', color: 'text-muted-foreground' },
+  unverified: { label: 'Not yet verified', color: 'text-amber-600' },
+  verified: { label: 'Verified human ✓', color: 'text-primary font-semibold' },
+  failed: { label: 'Check failed', color: 'text-destructive' },
+};
+const UBI_MAP = { unknown: 'Not checked', available: 'Claimable', claimed: 'Claimed today', not_eligible: 'Not eligible' };
 
+// ── Connected dashboard ───────────────────────────────────────────────────────
+function ConnectedDashboard({ profile, shortAddress, syncing, onSync, navigate }) {
+  const identity = IDENTITY_LABELS[profile?.identity_status] || IDENTITY_LABELS.unknown;
+  return (
+    <div className="min-h-screen bg-background">
+      <AppHeader showBack title="GoodDollar Rewards" />
+      <div className="max-w-lg mx-auto px-6 pt-6 pb-8">
+        {/* Success card */}
+        <div className="bg-primary/5 border border-primary/20 rounded-3xl p-6 mb-6 text-center">
+          <div className="w-14 h-14 bg-primary/15 rounded-full flex items-center justify-center mx-auto mb-3">
+            <CheckCircle2 className="w-7 h-7 text-primary" />
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-1">GoodDollar Connected</h2>
+          <p className="text-sm text-muted-foreground">Your verified G$ account is linked to SmartSpend</p>
+        </div>
+
+        {/* Balance */}
+        <div className="bg-white rounded-2xl border border-border p-5 mb-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs text-muted-foreground mb-1">G$ Balance</p>
+              <p className="text-4xl font-extrabold text-foreground">G$ {profile?.g_balance?.toFixed(2) || '0.00'}</p>
+            </div>
+            <button
+              onClick={onSync}
+              disabled={syncing}
+              className="p-2 rounded-xl hover:bg-muted transition-colors"
+            >
+              <RefreshCw className={`w-4 h-4 text-muted-foreground ${syncing ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Status rows */}
+        <div className="bg-white rounded-2xl border border-border divide-y divide-border mb-4">
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-muted-foreground"><Shield className="w-4 h-4" /><span className="text-sm">Identity status</span></div>
+            <span className={`text-sm ${identity.color}`}>{identity.label}</span>
+          </div>
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-muted-foreground"><TrendingUp className="w-4 h-4" /><span className="text-sm">UBI claim</span></div>
+            <span className="text-sm text-foreground">{UBI_MAP[profile?.ubi_claim_status] || '—'}</span>
+          </div>
+          <div className="px-4 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-muted-foreground"><Zap className="w-4 h-4" /><span className="text-sm">Wallet</span></div>
+            <div className="flex items-center gap-1">
+              <span className="text-sm font-mono text-foreground">{shortAddress || '—'}</span>
+              {profile?.wallet_address && (
+                <a href={`https://celoscan.io/address/${profile.wallet_address}`} target="_blank" rel="noopener noreferrer" className="text-primary">
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* CTAs */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button className="h-12 rounded-2xl text-sm" onClick={() => navigate('/campaigns')}>
+            Explore campaigns
+          </Button>
+          <Button variant="outline" className="h-12 rounded-2xl text-sm" onClick={() => navigate('/wallet?tab=gooddollar')}>
+            View rewards
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── "No G$ account yet" guide ─────────────────────────────────────────────────
+function NoAccountGuide({ onBack }) {
+  return (
+    <div className="min-h-screen bg-background">
+      <AppHeader showBack title="Get GoodDollar" />
+      <div className="max-w-lg mx-auto px-6 pt-6 pb-8">
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Zap className="w-8 h-8 text-primary" />
+          </div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Create your GoodDollar account</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            GoodDollar is a free universal basic income (UBI) protocol. Sign up, complete face verification, and come back here to connect your rewards.
+          </p>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-border divide-y divide-border mb-6">
+          {[
+            { step: '1', text: 'Go to GoodDapp and create a free account' },
+            { step: '2', text: 'Complete face verification to become a verified human' },
+            { step: '3', text: 'Copy your wallet address from your GoodDollar profile' },
+            { step: '4', text: 'Come back here and paste it to connect your account' },
+          ].map(item => (
+            <div key={item.step} className="px-4 py-4 flex items-start gap-4">
+              <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-xs font-bold text-primary">{item.step}</span>
+              </div>
+              <p className="text-sm text-foreground">{item.text}</p>
+            </div>
+          ))}
+        </div>
+
+        <a
+          href="https://gooddapp.gooddollar.org"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full"
+        >
+          <Button className="w-full h-14 rounded-2xl text-base font-bold mb-3">
+            Open GoodDapp <ExternalLink className="w-4 h-4 ml-1" />
+          </Button>
+        </a>
+        <button
+          onClick={onBack}
+          className="block w-full text-center text-sm text-muted-foreground"
+        >
+          I already have an account — go back
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── Main page ─────────────────────────────────────────────────────────────────
 export default function GoodDollarActivation() {
   const navigate = useNavigate();
-  const { isActivated, activating, activate, profile, shortAddress, connectExternalWallet } = useGoodDollar();
-  const [step, setStep] = useState(null); // null | 'activating' | 'done' | 'error'
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [externalAddress, setExternalAddress] = useState('');
-  const [linkingExternal, setLinkingExternal] = useState(false);
-  const [externalError, setExternalError] = useState('');
+  const { isActivated, linking, connectAddress, profile, shortAddress, sync, syncing } = useGoodDollar();
+  const [view, setView] = useState('main'); // 'main' | 'connect' | 'no-account' | 'verifying' | 'success' | 'error'
+  const [address, setAddress] = useState('');
+  const [verifyStatus, setVerifyStatus] = useState(null); // null | 'verified' | 'unverified'
+  const [linkError, setLinkError] = useState('');
 
-  const handleActivate = async () => {
-    setStep('activating');
-    try {
-      await activate();
-      setStep('done');
-    } catch (e) {
-      setStep('error');
+  // Already connected — show dashboard
+  if (isActivated) {
+    return <ConnectedDashboard profile={profile} shortAddress={shortAddress} syncing={syncing} onSync={sync} navigate={navigate} />;
+  }
+
+  if (view === 'no-account') {
+    return <NoAccountGuide onBack={() => setView('connect')} />;
+  }
+
+  const handleAddressChange = async (val) => {
+    setAddress(val);
+    setVerifyStatus(null);
+    if (val.trim().length === 42 && val.trim().startsWith('0x')) {
+      // Quick identity pre-check
+      try {
+        const { getIdentityStatus } = await import('@/services/goodDollarService');
+        const status = await getIdentityStatus(val.trim());
+        setVerifyStatus(status === 'verified' ? 'verified' : 'unverified');
+      } catch {
+        setVerifyStatus(null);
+      }
     }
   };
 
-  const handleLinkExternal = async () => {
-    setExternalError('');
-    setLinkingExternal(true);
+  const handleConnect = async () => {
+    setLinkError('');
     try {
-      await connectExternalWallet(externalAddress.trim());
-      setStep('done');
+      await connectAddress(address.trim());
+      setView('success');
     } catch (e) {
-      setExternalError(e.message || 'Please check the address and try again.');
+      setLinkError(e.message || 'Please check the address and try again.');
     }
-    setLinkingExternal(false);
   };
 
-  const IDENTITY_LABELS = {
-    unknown: { label: 'Not checked', color: 'text-muted-foreground' },
-    unverified: { label: 'Not yet verified', color: 'text-amber-600' },
-    verified: { label: 'Verified human ✓', color: 'text-primary font-semibold' },
-    failed: { label: 'Check failed', color: 'text-destructive' },
-  };
-  const UBI_MAP = { unknown: 'Not checked', available: 'Claimable', claimed: 'Claimed today', not_eligible: 'Not eligible' };
-
-  if (step === 'activating') {
+  if (view === 'success') {
     return (
-      <div className="min-h-screen bg-background flex flex-col">
-        <AppHeader showBack title="Activating rewards" />
-        <div className="flex-1 max-w-lg mx-auto px-6 pt-12 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-            <Zap className="w-8 h-8 text-primary animate-pulse" />
-          </div>
-          <h2 className="text-xl font-bold text-foreground mb-2 text-center">Setting up your rewards account</h2>
-          <p className="text-sm text-muted-foreground text-center mb-10">This only takes a moment.</p>
-          <div className="w-full space-y-3">
-            {STEPS.map((s, i) => (
-              <div key={s.key} className="flex items-center gap-3 bg-white rounded-2xl border border-border px-4 py-3">
-                <div className="w-5 h-5 flex-shrink-0">
-                  <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                </div>
-                <span className="text-sm text-foreground">{s.label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <ConnectedDashboard profile={profile} shortAddress={shortAddress} syncing={syncing} onSync={sync} navigate={navigate} />
     );
   }
 
-  if (step === 'done' || isActivated) {
-    const identity = IDENTITY_LABELS[profile?.identity_status] || IDENTITY_LABELS.unknown;
+  if (view === 'connect') {
     return (
       <div className="min-h-screen bg-background">
-        <AppHeader showBack title="GoodDollar Rewards" />
+        <AppHeader showBack title="Connect GoodDollar Account" />
         <div className="max-w-lg mx-auto px-6 pt-6 pb-8">
-          {/* Success */}
-          <div className="bg-primary/5 border border-primary/20 rounded-3xl p-6 mb-6 text-center">
-            <div className="w-14 h-14 bg-primary/15 rounded-full flex items-center justify-center mx-auto mb-3">
-              <CheckCircle2 className="w-7 h-7 text-primary" />
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <Shield className="w-7 h-7 text-primary" />
             </div>
-            <h2 className="text-xl font-bold text-foreground mb-1">Your SmartSpend Rewards Account is ready</h2>
-            <p className="text-sm text-muted-foreground">GoodDollar Rewards enabled on Celo Network</p>
+            <h2 className="text-xl font-bold text-foreground mb-2">Connect your verified account</h2>
+            <p className="text-sm text-muted-foreground">Paste your GoodDollar wallet address below. We'll check your verification status instantly.</p>
           </div>
 
-          {/* G$ Balance */}
-          <div className="bg-white rounded-2xl border border-border p-5 mb-4">
-            <p className="text-xs text-muted-foreground mb-1">G$ Balance</p>
-            <p className="text-4xl font-extrabold text-foreground">G$ {profile?.g_balance?.toFixed(2) || '0.00'}</p>
-          </div>
+          <div className="space-y-3 mb-4">
+            <Input
+              value={address}
+              onChange={e => handleAddressChange(e.target.value)}
+              placeholder="0x... your GoodDollar wallet address"
+              className="rounded-xl h-12 text-sm font-mono"
+            />
 
-          {/* Status */}
-          <div className="bg-white rounded-2xl border border-border divide-y divide-border mb-4">
-            <div className="px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground"><Shield className="w-4 h-4" /><span className="text-sm">Identity status</span></div>
-              <span className={`text-sm ${identity.color}`}>{identity.label}</span>
-            </div>
-            <div className="px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-muted-foreground"><TrendingUp className="w-4 h-4" /><span className="text-sm">UBI claim</span></div>
-              <span className="text-sm text-foreground">{UBI_MAP[profile?.ubi_claim_status] || '—'}</span>
-            </div>
-          </div>
-
-          {/* CTAs */}
-          <div className="grid grid-cols-2 gap-3 mb-6">
-            <Button className="h-12 rounded-2xl text-sm" onClick={() => navigate('/campaigns')}>
-              Explore campaigns
-            </Button>
-            <Button variant="outline" className="h-12 rounded-2xl text-sm" onClick={() => navigate('/wallet?tab=gooddollar')}>
-              View rewards
-            </Button>
-          </div>
-
-          {/* Advanced */}
-          <button onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center gap-1 text-xs text-muted-foreground">
-            {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-            Advanced account details
-          </button>
-          {showAdvanced && (
-            <div className="mt-3 bg-muted/40 rounded-xl p-4 space-y-2 text-xs text-muted-foreground">
-              <div className="flex items-center justify-between">
-                <span>Rewards account</span>
-                <div className="flex items-center gap-1">
-                  <span className="font-mono text-foreground">{shortAddress || '—'}</span>
-                  {profile?.wallet_address && (
-                    <a
-                      href={`https://celoscan.io/address/${profile.wallet_address}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  )}
-                </div>
+            {/* Instant verification feedback */}
+            {verifyStatus === 'verified' && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 border border-primary/20 rounded-xl">
+                <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                <p className="text-sm text-primary font-medium">Verified identity detected! Ready to connect.</p>
               </div>
-              <p>Wallet type: <span className="text-foreground capitalize">{profile?.wallet_type || 'embedded'}</span></p>
-              <p>Network: <span className="text-foreground">Celo Mainnet (chainId: 42220)</span></p>
-            </div>
-          )}
+            )}
+            {verifyStatus === 'unverified' && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl">
+                <XCircle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                <p className="text-sm text-amber-700">This address is not yet GoodDollar verified. You can still connect it and verify later.</p>
+              </div>
+            )}
+
+            {linkError && <p className="text-xs text-destructive">{linkError}</p>}
+          </div>
+
+          <Button
+            className="w-full h-14 rounded-2xl text-base font-bold mb-3"
+            onClick={handleConnect}
+            disabled={linking || !address.trim().startsWith('0x') || address.trim().length !== 42}
+          >
+            {linking ? 'Connecting…' : 'Connect Account'}
+            {!linking && <ArrowRight className="w-5 h-5 ml-1" />}
+          </Button>
+
+          <button
+            onClick={() => setView('no-account')}
+            className="block w-full text-center text-sm text-muted-foreground"
+          >
+            I don't have a GoodDollar account yet →
+          </button>
         </div>
       </div>
     );
   }
 
-  if (step === 'error') {
-    return (
-      <div className="min-h-screen bg-background">
-        <AppHeader showBack title="GoodDollar Rewards" />
-        <div className="max-w-lg mx-auto px-6 pt-16 text-center">
-          <XCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-lg font-bold text-foreground mb-2">Connection issue</h2>
-          <p className="text-sm text-muted-foreground mb-6">Your account was created, but rewards setup needs another try.</p>
-          <Button className="rounded-2xl h-12 mb-3" onClick={handleActivate}>Retry rewards setup</Button>
-          <br />
-          <button onClick={() => navigate(-1)} className="text-sm text-muted-foreground">Continue without rewards</button>
-        </div>
-      </div>
-    );
-  }
-
-  // Default: not yet activated
+  // Default: main choice screen
   return (
     <div className="min-h-screen bg-background">
       <AppHeader showBack title="GoodDollar Rewards" />
@@ -178,9 +254,9 @@ export default function GoodDollarActivation() {
           <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Zap className="w-8 h-8 text-primary" />
           </div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">Activate GoodDollar Rewards</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Unlock Daily Rewards</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Use your SmartSpend Rewards Account to view G$, unlock verified rewards, and join community campaigns.
+            Connect your GoodDollar verified account to earn G$ rewards on every spend, access your UBI, and join community campaigns.
           </p>
         </div>
 
@@ -189,7 +265,7 @@ export default function GoodDollarActivation() {
           {[
             { icon: <Zap className="w-4 h-4 text-primary" />, text: 'Earn G$ Boosts for verified spending actions' },
             { icon: <Shield className="w-4 h-4 text-primary" />, text: 'GoodDollar Identity protection' },
-            { icon: <TrendingUp className="w-4 h-4 text-primary" />, text: 'Access UBI claim status and balance' },
+            { icon: <TrendingUp className="w-4 h-4 text-primary" />, text: 'Access daily UBI claims and G$ balance' },
             { icon: <CheckCircle2 className="w-4 h-4 text-primary" />, text: 'Join community campaigns and earn rewards' },
           ].map((f, i) => (
             <div key={i} className="px-4 py-3 flex items-center gap-3">
@@ -199,44 +275,29 @@ export default function GoodDollarActivation() {
           ))}
         </div>
 
-        <Button className="w-full h-14 rounded-2xl text-base font-bold mb-3" onClick={handleActivate}>
-          <Zap className="w-5 h-5 mr-2" /> Activate GoodDollar Rewards
+        {/* Primary CTA: connect existing */}
+        <Button
+          className="w-full h-14 rounded-2xl text-base font-bold mb-3"
+          onClick={() => setView('connect')}
+        >
+          <Shield className="w-5 h-5 mr-2" /> Connect my verified G$ account
         </Button>
-        <p className="text-xs text-muted-foreground text-center mb-6">
-          Your SmartSpend Rewards Account will be prepared automatically.
-        </p>
-        <button onClick={() => navigate(-1)} className="block w-full text-center text-sm text-muted-foreground mb-6">
+
+        {/* Secondary CTA: no account */}
+        <Button
+          variant="outline"
+          className="w-full h-12 rounded-2xl text-sm mb-6"
+          onClick={() => setView('no-account')}
+        >
+          I don't have a GoodDollar account yet
+        </Button>
+
+        <button
+          onClick={() => navigate(-1)}
+          className="block w-full text-center text-sm text-muted-foreground"
+        >
           Not now
         </button>
-
-        {/* Advanced: link existing wallet */}
-        <div className="border-t border-border pt-4">
-          <button onClick={() => setShowAdvanced(!showAdvanced)} className="text-xs text-muted-foreground hover:text-foreground">
-            Use an existing wallet instead ↓
-          </button>
-          {showAdvanced && (
-            <div className="mt-3 space-y-2">
-              <Input
-                value={externalAddress}
-                onChange={e => setExternalAddress(e.target.value)}
-                placeholder="0x... Celo wallet address"
-                className="rounded-xl h-11 text-sm font-mono"
-              />
-              {externalError && <p className="text-xs text-destructive">{externalError}</p>}
-              <Button
-                variant="outline"
-                className="w-full h-11 rounded-xl text-sm"
-                onClick={handleLinkExternal}
-                disabled={linkingExternal || !externalAddress.trim()}
-              >
-                {linkingExternal ? 'Linking…' : 'Link existing wallet'}
-              </Button>
-              <p className="text-xs text-muted-foreground">
-                Already use GoodDollar? You can connect an existing Celo wallet.
-              </p>
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
