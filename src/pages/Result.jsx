@@ -25,8 +25,9 @@ export default function Result() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showWhy, setShowWhy] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
-  const [gRewardEarned, setGRewardEarned] = useState(0);
+  const confirmedKey = `combo_confirmed_${retailerId || retailerName}_${amount}`;
+  const [confirmed, setConfirmed] = useState(() => !!localStorage.getItem(confirmedKey));
+  const [gRewardEarned, setGRewardEarned] = useState(() => parseFloat(localStorage.getItem(`${confirmedKey}_g`) || '0'));
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -71,11 +72,13 @@ export default function Result() {
 
   const handleConfirmUsed = async () => {
     setConfirmed(true);
+    localStorage.setItem(confirmedKey, '1');
 
     // Determine G$ reward for this spend action (campaign-based, 5 G$ per confirmed spend comparison)
     const isEligibleForGReward = isActivated && profile?.identity_status === 'verified';
     const gAmount = isEligibleForGReward ? 5 : 0;
     setGRewardEarned(gAmount);
+    localStorage.setItem(`${confirmedKey}_g`, gAmount);
 
     if (isAuthenticated && result?.best_combo) {
       await base44.entities.EstimatedValueEvent.create({
