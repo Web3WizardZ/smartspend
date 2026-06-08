@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Zap, Shield, TrendingUp, CheckCircle2, XCircle, ExternalLink, ArrowRight, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,22 @@ const UBI_MAP = { unknown: 'Not checked', available: 'Claimable', claimed: 'Clai
 // ── Connected dashboard ───────────────────────────────────────────────────────
 function ConnectedDashboard({ profile, shortAddress, syncing, onSync, navigate }) {
   const identity = IDENTITY_LABELS[profile?.identity_status] || IDENTITY_LABELS.unknown;
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefreshStatus = async () => {
+    setRefreshing(true);
+    try {
+      const res = await base44.functions.invoke('refreshGoodDollarStatus', {});
+      if (res.data.success) {
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error('Refresh failed:', e);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <AppHeader showBack title="GoodDollar Rewards" />
