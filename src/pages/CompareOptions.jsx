@@ -5,9 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Check, Crown } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
 import Disclaimer from '../components/shared/Disclaimer';
+import { getCurrencySymbol } from '@/lib/currency';
+import { useCountry } from '@/context/CountryContext';
 
 export default function CompareOptions() {
   const navigate = useNavigate();
+  const { country } = useCountry();
+  const currencySymbol = getCurrencySymbol(country);
   const urlParams = new URLSearchParams(window.location.search);
   const retailerId = urlParams.get('retailer_id');
   const retailerName = urlParams.get('retailer_name');
@@ -34,6 +38,7 @@ export default function CompareOptions() {
       cards = c;
     }
 
+    const savedCountry = localStorage.getItem('smartspend_country');
     const res = await base44.functions.invoke('spendiq', {
       retailer_id: retailerId,
       retailer_name: retailerName,
@@ -42,6 +47,7 @@ export default function CompareOptions() {
       payment_profiles: profiles,
       loyalty_cards: cards,
       is_guest: !authed || profiles.length === 0,
+      country: savedCountry,
     });
     setResult(res.data);
     setLoading(false);
@@ -72,7 +78,7 @@ export default function CompareOptions() {
       <AppHeader showBack title="Other options" />
       <div className="max-w-lg mx-auto px-6 pt-4 pb-8">
         <p className="text-sm text-muted-foreground mb-6">
-          Other combos we checked for <span className="font-semibold text-foreground">{retailerName}</span> at <span className="font-semibold text-foreground">R{amount.toLocaleString()}</span>
+          Other combos we checked for <span className="font-semibold text-foreground">{retailerName}</span> at <span className="font-semibold text-foreground">{currencySymbol}{amount.toLocaleString()}</span>
         </p>
 
         <div className="space-y-3 mb-6">
@@ -102,7 +108,7 @@ export default function CompareOptions() {
                   )}
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-extrabold text-foreground">R{opt.estimated_value}</p>
+                  <p className="text-xl font-extrabold text-foreground">{currencySymbol}{opt.estimated_value}</p>
                   <span className={`text-[10px] font-semibold ${confColor[opt.confidence] || confColor.Low}`}>
                     {opt.confidence}
                   </span>

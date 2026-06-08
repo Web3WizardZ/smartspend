@@ -9,6 +9,8 @@ import Disclaimer from '../components/shared/Disclaimer';
 import LogoAvatar from '../components/shared/LogoAvatar';
 import GBoostResultCard from '../components/gooddollar/GBoostResultCard';
 import { useGoodDollar } from '@/context/GoodDollarContext';
+import { getCurrencySymbol } from '@/lib/currency';
+import { useCountry } from '@/context/CountryContext';
 
 export default function Result() {
   const navigate = useNavigate();
@@ -20,6 +22,8 @@ export default function Result() {
   const amountBand = urlParams.get('amount_band');
 
   const { profile, isActivated } = useGoodDollar();
+  const { country } = useCountry();
+  const currencySymbol = getCurrencySymbol(country);
   const { toast } = useToast();
 
   const [result, setResult] = useState(null);
@@ -51,6 +55,7 @@ export default function Result() {
       cards = c;
     }
 
+    const savedCountry = localStorage.getItem('smartspend_country');
     const res = await base44.functions.invoke('spendiq', {
       retailer_id: retailerId,
       retailer_name: retailerName,
@@ -59,6 +64,7 @@ export default function Result() {
       payment_profiles: profiles,
       loyalty_cards: cards,
       is_guest: !authed || profiles.length === 0,
+      country: savedCountry,
     });
 
     setResult(res.data);
@@ -168,7 +174,7 @@ export default function Result() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-xs text-muted-foreground font-medium">Estimated total value</p>
-                  <p className="text-4xl font-extrabold text-primary">${best.estimated_value}</p>
+                  <p className="text-4xl font-extrabold text-primary">{currencySymbol}{best.estimated_value}</p>
                 </div>
                 <span className={`px-3 py-1 rounded-full text-xs font-semibold ${confColor[best.confidence] || confColor.Low}`}>
                   {best.confidence} confidence

@@ -19,6 +19,11 @@
     "category": {
       "type": "string"
     },
+    "country": {
+      "type": "string",
+      "default": "ZA",
+      "description": "ISO country code this rule applies to, e.g. ZA, KE, GB"
+    },
     "reward_type": {
       "type": "string",
       "enum": [

@@ -3,11 +3,12 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
   
-  const { retailer_id, retailer_name, category, amount, payment_profiles, loyalty_cards, is_guest } = await req.json();
+  const { retailer_id, retailer_name, category, amount, payment_profiles, loyalty_cards, is_guest, country } = await req.json();
 
-  // Fetch reward rules for this category
+  // Fetch reward rules for this category, filtered by country if provided
   const allRules = await base44.asServiceRole.entities.RewardRule.filter({ active: true });
-  const categoryRules = allRules.filter(r => r.category === category);
+  const countryRules = country ? allRules.filter(r => !r.country || r.country === country) : allRules;
+  const categoryRules = countryRules.filter(r => r.category === category);
 
   // Calculate estimated values for each payment profile + loyalty card combination
   const options = [];
