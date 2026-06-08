@@ -5,9 +5,20 @@ Deno.serve(async (req) => {
   
   const { retailer_id, retailer_name, category, amount, payment_profiles, loyalty_cards, is_guest, country } = await req.json();
 
-  // Fetch reward rules for this category, filtered by country if provided
-  const allRules = await base44.asServiceRole.entities.RewardRule.filter({ active: true });
-  const countryRules = country ? allRules.filter(r => !r.country || r.country === country) : allRules;
+  // Fetch reward rules and programmes for this category, filtered by country
+  const [allRules, allProgrammes] = await Promise.all([
+    base44.asServiceRole.entities.RewardRule.filter({ active: true }),
+    base44.asServiceRole.entities.RewardProgramme.filter({ active: true }),
+  ]);
+
+  // Build a map of programme_id -> type from RewardProgramme
+  const progTypeMap = {};
+  for (const p of allProgrammes) {
+    progTypeMap[p.id] = p.type; // "bank", "loyalty", "retailer", "fuel", "other"
+  }
+
+  // Filter by country: only rules that match the selected country (strict — no country fallback)
+  const countryRules = country ? allRules.filter(r => r.country === country) : allRules;
   const categoryRules = countryRules.filter(r => r.category === category);
 
   // Calculate estimated values for each payment profile + loyalty card combination
@@ -15,15 +26,9 @@ Deno.serve(async (req) => {
   const reasonCodes = [];
   const missingProgrammes = [];
 
-  // Get all loyalty programmes for this category
-  const loyaltyRules = categoryRules.filter(r => {
-    const progType = getProgrammeType(r.programme_name);
-    return progType === 'loyalty';
-  });
-  const bankRules = categoryRules.filter(r => {
-    const progType = getProgrammeType(r.programme_name);
-    return progType === 'bank';
-  });
+  // Classify rules using the RewardProgramme.type field; "bank" = card-based, everything else = loyalty/retailer
+  const bankRules = categoryRules.filter(r => progTypeMap[r.programme_id] === 'bank');
+  const loyaltyRules = categoryRules.filter(r => progTypeMap[r.programme_id] !== 'bank');
 
   if (is_guest || !payment_profiles || payment_profiles.length === 0) {
     // Guest mode: show general estimates based on category rules
@@ -162,32 +167,6 @@ Deno.serve(async (req) => {
   });
 });
 
-function getProgrammeType(name) {
-  // Generic keyword matching for common programme types across markets
-  const bankKeywords = [
-    // ZA
-    "eBucks", "Discovery Miles", "Absa Rewards", "UCount", "Greenbacks", "Live Better", "Investec Rewards", "Multiply", "Momentum",
-    // KE
-    "M-Pesa", "KCB", "Equity", "Co-op",
-    // GB
-    "Avios", "Barclays", "Lloyds", "NatWest", "HSBC",
-    // Generic
-    "Rewards", "Points", "Miles", "Cashback",
-  ];
-  const loyaltyKeywords = [
-    // ZA
-    "Xtra Savings", "Smart Shopper", "WRewards", "ClubCard", "Benefit", "Xpress", "Ster-Kinekor", "Dis-Chem", "Clicks",
-    // KE
-    "Jumia", "Naivas", "Carrefour",
-    // GB
-    "Nectar", "Tesco", "Boots Advantage", "Superdrug",
-    // Generic
-    "Card", "Club", "Loyalty",
-  ];
-  if (bankKeywords.some(k => name.includes(k))) return "bank";
-  if (loyaltyKeywords.some(k => name.includes(k))) return "loyalty";
-  return "loyalty";
-}
 
 function getOverallConfidence(bankConf, loyaltyConf, levelKnown) {
   const levels = { "High": 3, "Medium": 2, "Low": 1 };
