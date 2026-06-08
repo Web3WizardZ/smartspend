@@ -28,6 +28,11 @@ export function GoodDollarProvider({ children }) {
    */
   const connectAddress = useCallback(async (address) => {
     setLinking(true);
+    const authed = await base44.auth.isAuthenticated();
+    if (!authed) {
+      setLinking(false);
+      throw new Error('Please sign in to connect your GoodDollar account.');
+    }
     const me = await base44.auth.me();
 
     let balance = 0, identity = 'unknown', ubi = 'unknown';

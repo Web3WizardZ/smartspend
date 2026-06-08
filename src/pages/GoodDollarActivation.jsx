@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AppHeader from '@/components/shared/AppHeader';
 import { useGoodDollar } from '@/context/GoodDollarContext';
+import { base44 } from '@/api/base44Client';
 
 const IDENTITY_LABELS = {
   unknown: { label: 'Not checked', color: 'text-muted-foreground' },
@@ -117,7 +118,7 @@ function NoAccountGuide({ onBack }) {
         </div>
 
         <a
-          href="https://gooddapp.gooddollar.org"
+          href="https://gooddapp.org"
           target="_blank"
           rel="noopener noreferrer"
           className="block w-full"
@@ -176,7 +177,11 @@ export default function GoodDollarActivation() {
       await connectAddress(address.trim());
       setView('success');
     } catch (e) {
-      setLinkError(e.message || 'Please check the address and try again.');
+      if (e.message?.includes('sign in')) {
+        base44.auth.redirectToLogin(window.location.pathname);
+      } else {
+        setLinkError(e.message || 'Please check the address and try again.');
+      }
     }
   };
 
