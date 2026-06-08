@@ -1,61 +1,139 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { Trophy, Flame, Star, TrendingUp } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
-const BADGES = [
-  { id: 'first_combo', label: 'First Combo', emoji: '🎯', desc: 'Check your first spend combo', check: (events) => events.length >= 1 },
-  { id: 'streak_3', label: '3-Day Streak', emoji: '🔥', desc: 'Use the app 3 days in a row', check: (events) => computeStreak(events) >= 3 },
-  { id: 'streak_7', label: 'Week Warrior', emoji: '⚡', desc: '7-day streak', check: (events) => computeStreak(events) >= 7 },
-  { id: 'g_earner', label: 'G$ Earner', emoji: '💚', desc: 'Earn your first G$ reward', check: (events) => events.some(e => (e.g_reward_amount || 0) > 0) },
-  { id: 'categories_3', label: 'Explorer', emoji: '🧭', desc: 'Shop across 3 categories', check: (events) => new Set(events.map(e => e.category).filter(Boolean)).size >= 3 },
-  { id: 'categories_5', label: 'Diversified', emoji: '🌟', desc: 'Shop across 5 categories', check: (events) => new Set(events.map(e => e.category).filter(Boolean)).size >= 5 },
-  { id: 'spender_500', label: 'Big Spender', emoji: '💰', desc: 'Track R500+ in value', check: (events) => events.reduce((s, e) => s + (e.estimated_value || 0), 0) >= 500 },
-  { id: 'spender_1000', label: 'Power Saver', emoji: '🏆', desc: 'Track R1000+ in value', check: (events) => events.reduce((s, e) => s + (e.estimated_value || 0), 0) >= 1000 },
-];
-
-function computeStreak(events) {
-  const days = [...new Set(
-    events.filter(e => e.user_confirmed_used).map(e => new Date(e.created_date).toDateString())
-  )].map(d => new Date(d)).sort((a, b) => b - a);
-  if (!days.length) return 0;
-  let streak = 1;
-  for (let i = 1; i < days.length; i++) {
-    if ((days[i - 1] - days[i]) / 86400000 <= 1) streak++;
-    else break;
-  }
-  return streak;
-}
-
 export default function AchievementBadges() {
-  const { data: events = [] } = useQuery({
-    queryKey: ['value-events-badges'],
-    queryFn: () => base44.entities.EstimatedValueEvent.list('-created_date', 100),
-  });
+  const [badges, setBadges] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const earned = BADGES.filter(b => b.check(events));
-  const locked = BADGES.filter(b => !b.check(events));
+  useEffect(() => {
+    loadBadges();
+  }, []);
+
+  const loadBadges = async () => {
+    try {
+      const authed = await base44.auth.isAuthenticated();
+      if (!authed) {
+        setLoading(false);
+        return;
+      }
+
+      const events = await base44.entities.EstimatedValueEvent.filter({ user_confirmed_used: true }, '-created_date', 100);
+      const totalG = events.reduce((sum, e) => sum + (e.g_reward_amount || 0), 0);
+      const totalSpends = events.length;
+      
+      const earned = [];
+      
+      // First spend
+      if (totalSpends >= 1) {
+        earned.push({
+          id: 'first_spend',
+          name: 'First Steps',
+          description: 'Tracked your first spend',
+          icon: '🎯',
+          color: 'bg-blue-100 text-blue-700',
+        });
+      }
+
+      // 10 spends
+      if (totalSpends >= 10) {
+        earned.push({
+          id: 'dedicated_user',
+          name: 'Dedicated Saver',
+          description: 'Tracked 10 spends',
+          icon: '💪',
+          color: 'bg-purple-100 text-purple-700',
+        });
+      }
+
+      // G$ earner
+      if (totalG > 0) {
+        earned.push({
+          id: 'g_earner',
+          name: 'G$ Earner',
+          description: `Earned G$ ${totalG}`,
+          icon: '💰',
+          color: 'bg-green-100 text-green-700',
+        });
+      }
+
+      // G$ 50+ earner
+      if (totalG >= 50) {
+        earned.push({
+          id: 'g_champion',
+          name: 'G$ Champion',
+          description: 'Earned G$ 50+',
+          icon: '🏆',
+          color: 'bg-yellow-100 text-yellow-700',
+        });
+      }
+
+      // Verified identity
+      const profiles = await base44.entities.GoodDollarProfile.filter({});
+      const profile = profiles[0];
+      if (profile?.identity_status === 'verified') {
+        earned.push({
+          id: 'verified_human',
+          name: 'Verified Human',
+          description: 'Completed GoodDollar verification',
+          icon: '✓',
+          color: 'bg-primary/20 text-primary',
+        });
+      }
+
+      setBadges(earned);
+    } catch (e) {
+      console.error('Failed to load badges:', e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const lockedBadges = [
+    { id: 'streak_7', name: '7-Day Streak', description: 'Claim UBI 7 days in a row', icon: '🔥', locked: true },
+    { id: 'referral', name: 'Ambassador', description: 'Invite 3 friends', icon: '👥', locked: true },
+    { id: 'g_100', name: 'G$ Master', description: 'Earn G$ 100+', icon: '👑', locked: true },
+  ];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="w-6 h-6 border-2 border-muted border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-2xl border border-border overflow-hidden mb-4">
-      <div className="px-4 py-3 border-b border-border flex items-center justify-between">
-        <p className="text-sm font-bold text-foreground">Achievements</p>
-        <span className="text-xs text-muted-foreground">{earned.length}/{BADGES.length} earned</span>
-      </div>
-      <div className="p-4 grid grid-cols-4 gap-3">
-        {BADGES.map(badge => {
-          const unlocked = earned.includes(badge);
-          return (
-            <div key={badge.id} className="flex flex-col items-center gap-1 text-center">
-              <div className={`w-11 h-11 rounded-2xl flex items-center justify-center text-xl transition-all
-                ${unlocked ? 'bg-primary/10' : 'bg-muted opacity-40 grayscale'}`}>
-                {badge.emoji}
-              </div>
-              <p className={`text-[9px] font-semibold leading-tight ${unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
-                {badge.label}
-              </p>
+    <div>
+      <h3 className="text-base font-bold text-foreground mb-4">Your Achievements</h3>
+      
+      {badges.length === 0 ? (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+            <Trophy className="w-8 h-8 text-muted-foreground" />
+          </div>
+          <p className="text-sm font-semibold text-foreground mb-1">No badges yet</p>
+          <p className="text-xs text-muted-foreground">Start tracking spends to earn achievements!</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {badges.map(badge => (
+            <div key={badge.id} className={`${badge.color} rounded-2xl p-3 text-center`}>
+              <div className="text-2xl mb-1">{badge.icon}</div>
+              <p className="text-[10px] font-bold leading-tight">{badge.name}</p>
             </div>
-          );
-        })}
+          ))}
+        </div>
+      )}
+
+      <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Locked Badges</h4>
+      <div className="grid grid-cols-3 gap-3">
+        {lockedBadges.map(badge => (
+          <div key={badge.id} className="bg-muted/50 rounded-2xl p-3 text-center opacity-60">
+            <div className="text-2xl mb-1 grayscale">{badge.icon}</div>
+            <p className="text-[10px] font-bold leading-tight text-muted-foreground">{badge.name}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
