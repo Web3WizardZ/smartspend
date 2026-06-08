@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Users, Zap, CheckCircle2, Trophy, Calendar, ArrowRight } from 'lucide-react';
+import { Users, Zap, CheckCircle2, Trophy, ArrowRight } from 'lucide-react';
+import CampaignProgressCircle from '@/components/campaigns/CampaignProgressCircle';
 import { Button } from '@/components/ui/button';
 import AppHeader from '@/components/shared/AppHeader';
 import { useGoodDollar } from '@/context/GoodDollarContext';
@@ -123,15 +124,24 @@ export default function Campaigns() {
                 <div key={campaign.id} className="bg-white rounded-2xl border border-border overflow-hidden">
                   {/* Top */}
                   <div className="px-5 pt-5 pb-4">
-                    <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          {campaign.category && (
+                            <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${catColor}`}>
+                              {campaign.category}
+                            </span>
+                          )}
+                        </div>
                         <p className="text-sm font-bold text-foreground">{campaign.name}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{campaign.description}</p>
                       </div>
-                      {campaign.category && (
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${catColor}`}>
-                          {campaign.category}
-                        </span>
+                      {joined && (
+                        <CampaignProgressCircle
+                          actionsCompleted={participation?.actions_completed || 0}
+                          targetActions={5}
+                          rewardG={campaign.reward_per_action_g || 5}
+                        />
                       )}
                     </div>
 

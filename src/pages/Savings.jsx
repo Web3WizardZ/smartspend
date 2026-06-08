@@ -3,6 +3,7 @@ import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { TrendingUp, ShoppingBag, CreditCard, Barcode, Zap } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
+import CategoryMastery from '@/components/savings/CategoryMastery';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useGoodDollar } from '@/context/GoodDollarContext';
@@ -76,6 +77,9 @@ export default function Savings() {
             </button>
           </div>
         )}
+
+        {/* Category Mastery */}
+        {events.length > 0 && <CategoryMastery events={events} />}
 
         {/* Highlights */}
         {events.length > 0 && (
