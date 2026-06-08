@@ -55,7 +55,6 @@ export default function Result() {
       cards = c;
     }
 
-    const savedCountry = localStorage.getItem('smartspend_country');
     const res = await base44.functions.invoke('spendiq', {
       retailer_id: retailerId,
       retailer_name: retailerName,
@@ -64,7 +63,7 @@ export default function Result() {
       payment_profiles: profiles,
       loyalty_cards: cards,
       is_guest: !authed || profiles.length === 0,
-      country: savedCountry,
+      country,
     });
 
     setResult(res.data);

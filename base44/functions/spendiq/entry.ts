@@ -163,12 +163,29 @@ Deno.serve(async (req) => {
 });
 
 function getProgrammeType(name) {
-  // Retailer/loyalty programmes — not bank-issued
-  const loyaltyKeywords = ["Xtra Savings", "Smart Shopper", "WRewards", "ClubCard", "Benefit", "Xpress", "Ster-Kinekor", "Dis-Chem", "Clicks"];
-  const bankKeywords = ["eBucks", "Discovery Miles", "Absa Rewards", "UCount", "Greenbacks", "Live Better", "Investec Rewards", "Multiply", "Momentum"];
+  // Generic keyword matching for common programme types across markets
+  const bankKeywords = [
+    // ZA
+    "eBucks", "Discovery Miles", "Absa Rewards", "UCount", "Greenbacks", "Live Better", "Investec Rewards", "Multiply", "Momentum",
+    // KE
+    "M-Pesa", "KCB", "Equity", "Co-op",
+    // GB
+    "Avios", "Barclays", "Lloyds", "NatWest", "HSBC",
+    // Generic
+    "Rewards", "Points", "Miles", "Cashback",
+  ];
+  const loyaltyKeywords = [
+    // ZA
+    "Xtra Savings", "Smart Shopper", "WRewards", "ClubCard", "Benefit", "Xpress", "Ster-Kinekor", "Dis-Chem", "Clicks",
+    // KE
+    "Jumia", "Naivas", "Carrefour",
+    // GB
+    "Nectar", "Tesco", "Boots Advantage", "Superdrug",
+    // Generic
+    "Card", "Club", "Loyalty",
+  ];
   if (bankKeywords.some(k => name.includes(k))) return "bank";
   if (loyaltyKeywords.some(k => name.includes(k))) return "loyalty";
-  // Fallback: if provider is a known bank programme treat as bank, else loyalty
   return "loyalty";
 }
 

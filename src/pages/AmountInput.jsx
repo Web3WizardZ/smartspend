@@ -6,20 +6,24 @@ import AppHeader from '../components/shared/AppHeader';
 import LogoAvatar from '../components/shared/LogoAvatar';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
+import { useCountry } from '@/context/CountryContext';
+import { getCurrencySymbol } from '@/lib/currency';
 
 const QUICK_AMOUNTS = [10, 25, 50, 100, 250];
 
 function getAmountBand(amount) {
-  if (amount <= 10) return '$0–$10';
-  if (amount <= 25) return '$11–$25';
-  if (amount <= 50) return '$26–$50';
-  if (amount <= 100) return '$51–$100';
-  if (amount <= 250) return '$101–$250';
-  return '$250+';
+  if (amount <= 10) return '0–10';
+  if (amount <= 25) return '11–25';
+  if (amount <= 50) return '26–50';
+  if (amount <= 100) return '51–100';
+  if (amount <= 250) return '101–250';
+  return '250+';
 }
 
 export default function AmountInput() {
   const navigate = useNavigate();
+  const { country } = useCountry();
+  const currencySymbol = getCurrencySymbol(country);
   const urlParams = new URLSearchParams(window.location.search);
   const retailerId = urlParams.get('retailer_id');
   const retailerName = urlParams.get('retailer_name');
@@ -72,7 +76,7 @@ export default function AmountInput() {
 
         {/* Amount input */}
         <div className="relative mb-6">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-primary">$</span>
+          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-primary">{currencySymbol}</span>
           <Input
             type="number"
             value={amount}
@@ -94,7 +98,7 @@ export default function AmountInput() {
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-white border border-border text-foreground hover:border-primary'}`}
             >
-              ${qa.toLocaleString()}
+              {currencySymbol}{qa.toLocaleString()}
             </button>
           ))}
         </div>
