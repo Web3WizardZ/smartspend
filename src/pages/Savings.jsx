@@ -7,6 +7,7 @@ import CategoryMastery from '@/components/savings/CategoryMastery';
 import StreakCounter from '@/components/savings/StreakCounter';
 import GLeaderboard from '@/components/savings/GLeaderboard';
 import GEarningsDashboard from '@/components/savings/GEarningsDashboard';
+import GImpactDashboard from '@/components/savings/GImpactDashboard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useGoodDollar } from '@/context/GoodDollarContext';
@@ -85,6 +86,9 @@ export default function Savings() {
             </button>
           </div>
         )}
+
+        {/* G$ Impact Dashboard */}
+        <GImpactDashboard />
 
         {/* G$ Campaign Earnings Dashboard */}
         {isActivated && userId && <GEarningsDashboard userId={userId} />}

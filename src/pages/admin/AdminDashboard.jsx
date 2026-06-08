@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
-import { Store, Award, BookOpen, Settings, ChevronRight, Shield, Zap, Trophy, Users } from 'lucide-react';
+import { Store, Award, BookOpen, Settings, ChevronRight, Shield, Zap, Trophy, Users, TrendingUp } from 'lucide-react';
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -92,6 +92,17 @@ export default function AdminDashboard() {
               </div>
             ))}
           </div>
+          <Link to="/admin/gooddollar-analytics" className="block bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 hover:bg-primary/15 transition-all mb-4">
+            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-primary" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm font-bold text-foreground">GoodDollar Impact Analytics</p>
+              <p className="text-xs text-muted-foreground">View aggregate metrics & reports</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </Link>
+
           <Link to="/campaigns" className="block bg-primary/5 border border-primary/20 rounded-2xl p-4 flex items-center gap-3 hover:bg-primary/8 transition-all mb-4">
             <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
               <Trophy className="w-5 h-5 text-primary" />

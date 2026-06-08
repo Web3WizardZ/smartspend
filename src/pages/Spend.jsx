@@ -10,6 +10,7 @@ import GuestFeedbackPopup, { useGuestFeedbackTrigger } from '../components/goodd
 import CountryPicker from '../components/spend/CountryPicker';
 import { useCountry, COUNTRIES } from '@/context/CountryContext';
 import RewardsStrategyChat from '@/components/spend/RewardsStrategyChat';
+import GDollarHomeWidget from '@/components/gooddollar/GDollarHomeWidget';
 
 const LOGO_URL = "https://media.base44.com/images/public/user_69ea57333f824d48a1afdd12/e7314e200_image.png";
 
@@ -72,6 +73,11 @@ export default function Spend() {
             </button>
           </div>
           <p className="text-sm text-muted-foreground mb-4">Check your best estimated rewards combo before you pay.</p>
+
+          {/* GoodDollar Home Widget */}
+          <div className="mb-5">
+            <GDollarHomeWidget onClaimClick={() => window.open('https://gooddapp.org', '_blank')} />
+          </div>
 
           {/* G$ Boost banner */}
           <div className="mb-5">

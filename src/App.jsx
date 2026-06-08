@@ -24,6 +24,7 @@ import AdminProgrammes from './pages/admin/AdminProgrammes';
 import AdminRules from './pages/admin/AdminRules';
 import GoodDollarActivation from './pages/GoodDollarActivation';
 import Campaigns from './pages/Campaigns';
+import GoodDollarAnalytics from './pages/admin/GoodDollarAnalytics';
 import { GoodDollarProvider } from './context/GoodDollarContext';
 import { CountryProvider } from './context/CountryContext';
 import Login from './pages/Login';
@@ -78,6 +79,7 @@ const AuthenticatedApp = () => {
       <Route path="/admin/retailers" element={<AdminRetailers />} />
       <Route path="/admin/programmes" element={<AdminProgrammes />} />
       <Route path="/admin/rules" element={<AdminRules />} />
+      <Route path="/admin/gooddollar-analytics" element={<GoodDollarAnalytics />} />
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
