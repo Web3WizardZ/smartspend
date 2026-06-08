@@ -17,9 +17,14 @@ Deno.serve(async (req) => {
     progTypeMap[p.id] = p.type; // "bank", "loyalty", "retailer", "fuel", "other"
   }
 
-  // Filter by country: only rules that match the selected country (strict — no country fallback)
+  // Filter by country: prefer rules matching the selected country, but fall back to generic category-wide rules if no country data exists
   const countryRules = country ? allRules.filter(r => r.country === country) : allRules;
-  const categoryRules = countryRules.filter(r => r.category === category);
+  let categoryRules = countryRules.filter(r => r.category === category);
+  
+  // If no rules found for this country+category, fall back to generic category-wide rules (no retailer_id) from any country
+  if (categoryRules.length === 0) {
+    categoryRules = allRules.filter(r => r.category === category && !r.retailer_id);
+  }
 
   // Calculate estimated values for each payment profile + loyalty card combination
   const options = [];
@@ -30,16 +35,22 @@ Deno.serve(async (req) => {
   const bankRules = categoryRules.filter(r => progTypeMap[r.programme_id] === 'bank');
   // For loyalty rules: include category-wide rules (no retailer_id) OR retailer-specific rules matching the current retailer
   const loyaltyRules = categoryRules.filter(r => 
-    progTypeMap[r.programme_id] !== 'bank' &&
+    progTypeMap[r.programme_id] && progTypeMap[r.programme_id] !== 'bank' &&
     (!r.retailer_id || !retailer_id || r.retailer_id === retailer_id)
   );
 
-  // Check after country filtering if there are any relevant profiles
+  // Check if there are any relevant profiles (only filter by country if we have country-specific rules)
+  const hasCountrySpecificRules = country && allRules.some(r => r.country === country && r.category === category);
   const hasRelevantProfiles = !is_guest && payment_profiles?.length > 0 &&
-    (() => {
-      const names = new Set(bankRules.map(r => r.programme_name));
-      return payment_profiles.some(p => names.has(p.reward_programme) || names.has(p.bank_name));
-    })();
+    (hasCountrySpecificRules ? 
+      // Strict filtering for countries with data
+      (() => {
+        const names = new Set(bankRules.map(r => r.programme_name));
+        return payment_profiles.some(p => names.has(p.reward_programme) || names.has(p.bank_name));
+      })() :
+      // Lenient: allow all profiles when falling back to generic rules
+      true
+    );
 
   if (!hasRelevantProfiles) {
     // Guest mode: show general estimates based on category rules (already filtered by country and retailer)
@@ -93,19 +104,18 @@ Deno.serve(async (req) => {
   // Signed-in user: calculate personalized combos
   const userLoyaltyNames = (loyalty_cards || []).map(lc => lc.programme_name);
 
-  // Only include payment profiles that have at least one bank rule in the target country
+  // Only include payment profiles that have at least one bank rule in the target country (strict for countries with data, lenient for fallback)
   const countryBankProgrammeNames = new Set(bankRules.map(r => r.programme_name));
   const relevantProfiles = payment_profiles.filter(p =>
-    countryBankProgrammeNames.has(p.reward_programme) ||
-    countryBankProgrammeNames.has(p.bank_name)
+    hasCountrySpecificRules ?
+      (countryBankProgrammeNames.has(p.reward_programme) || countryBankProgrammeNames.has(p.bank_name)) :
+      true // Allow all profiles when using generic fallback
   );
 
-  // Only include loyalty cards that have rules in the target country AND match the retailer (if retailer-specific)
-  const countryLoyaltyProgrammeNames = new Set(loyaltyRules.map(r => r.programme_name));
+  // Only include loyalty cards that have rules matching the current retailer (if retailer-specific)
+  // When using generic fallback rules (no country data), be more lenient - allow all cards
   const relevantCards = (loyalty_cards || []).filter(c => {
-    // Must have rules in target country
-    if (!countryLoyaltyProgrammeNames.has(c.programme_name)) return false;
-    // If user's card is retailer-specific (retailer_id matches), only include if it matches the current retailer
+    // Only filter by retailer if both the card and current context have retailer_id
     if (c.retailer_id && retailer_id && c.retailer_id !== retailer_id) return false;
     return true;
   });
