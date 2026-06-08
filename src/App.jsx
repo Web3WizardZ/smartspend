@@ -25,6 +25,7 @@ import AdminRules from './pages/admin/AdminRules';
 import GoodDollarActivation from './pages/GoodDollarActivation';
 import Campaigns from './pages/Campaigns';
 import { GoodDollarProvider } from './context/GoodDollarContext';
+import { CountryProvider } from './context/CountryContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
@@ -94,7 +95,9 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <GoodDollarProvider>
-            <AuthenticatedApp />
+            <CountryProvider>
+              <AuthenticatedApp />
+            </CountryProvider>
           </GoodDollarProvider>
         </Router>
         <Toaster />

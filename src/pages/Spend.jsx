@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
-import { Search } from 'lucide-react';
+import { Search, ChevronDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import StoreChip from '../components/spend/StoreChip';
 import GBoostBanner from '../components/gooddollar/GBoostBanner';
 import GuestFeedbackPopup, { useGuestFeedbackTrigger } from '../components/gooddollar/GuestFeedbackPopup';
+import CountryPicker from '../components/spend/CountryPicker';
+import { useCountry, COUNTRIES } from '@/context/CountryContext';
 
 const LOGO_URL = "https://media.base44.com/images/public/user_69ea57333f824d48a1afdd12/e7314e200_image.png";
 
@@ -15,6 +17,7 @@ export default function Spend() {
   const location = useLocation();
   const [search, setSearch] = useState('');
   const { show: showFeedback, trigger: triggerFeedback, dismiss: dismissFeedback } = useGuestFeedbackTrigger();
+  const { country, clearCountry } = useCountry();
 
   // Trigger feedback popup when user returns from a result
   useEffect(() => {
@@ -24,10 +27,15 @@ export default function Spend() {
   }, [location.state, triggerFeedback]);
 
   const { data: retailers = [], isLoading } = useQuery({
-    queryKey: ['retailers'],
-    queryFn: () => base44.entities.Retailer.filter({ active: true }, 'sort_order', 50),
+    queryKey: ['retailers', country],
+    queryFn: () => base44.entities.Retailer.filter({ active: true, country }, 'sort_order', 50),
+    enabled: !!country,
   });
 
+  // Show country picker if no country selected
+  if (!country) return <CountryPicker />;
+
+  const selectedCountry = COUNTRIES.find(c => c.code === country);
   const popularStores = retailers.filter(r => r.popular);
   const filteredStores = search
     ? retailers.filter(r => r.name.toLowerCase().includes(search.toLowerCase()) || r.category.toLowerCase().includes(search.toLowerCase()))
@@ -51,7 +59,17 @@ export default function Spend() {
           <h1 className="text-[15px] font-bold text-primary mt-3 tracking-wide">SmartSpend</h1>
           <p className="text-[11px] text-primary/70 font-medium mb-6">Know what to pay with. Know what to scan.</p>
 
-          <h2 className="text-2xl font-bold text-foreground mb-1">Where are you spending?</h2>
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-2xl font-bold text-foreground">Where are you spending?</h2>
+            <button
+              onClick={clearCountry}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary text-xs font-semibold text-foreground hover:bg-muted transition-colors"
+            >
+              <span>{selectedCountry?.flag}</span>
+              <span>{selectedCountry?.name}</span>
+              <ChevronDown className="w-3 h-3 text-muted-foreground" />
+            </button>
+          </div>
           <p className="text-sm text-muted-foreground mb-4">Check your best estimated rewards combo before you pay.</p>
 
           {/* G$ Boost banner */}
