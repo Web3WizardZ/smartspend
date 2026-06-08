@@ -22,7 +22,8 @@ export default function AddLoyaltyCard() {
     queryKey: ['loyalty-programmes'],
     queryFn: async () => {
       const all = await base44.entities.RewardProgramme.filter({ active: true });
-      return all.filter(p => p.type === 'loyalty');
+      // Exclude bank-type programmes (those are payment profiles, not loyalty cards)
+      return all.filter(p => p.type !== 'bank');
     },
   });
 

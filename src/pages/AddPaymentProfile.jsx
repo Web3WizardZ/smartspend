@@ -5,19 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import AppHeader from '../components/shared/AppHeader';
 import { CreditCard } from 'lucide-react';
-
-const BANKS = [
-  { name: 'FNB', programme: 'eBucks', initials: 'FNB', colour: '#009A44' },
-  { name: 'Discovery Bank', programme: 'Discovery Miles', initials: 'DB', colour: '#003B5C' },
-  { name: 'Standard Bank', programme: 'UCount', initials: 'SB', colour: '#0033A0' },
-  { name: 'Absa', programme: 'Absa Rewards', initials: 'AB', colour: '#AF0000' },
-  { name: 'Nedbank', programme: 'Greenbacks', initials: 'NB', colour: '#007749' },
-  { name: 'Capitec', programme: 'Live Better', initials: 'CP', colour: '#009DDC' },
-  { name: 'TymeBank', programme: 'TymeBank Rewards', initials: 'TYME', colour: '#FFD100' },
-];
 
 const TIERS = ['Entry', 'Gold', 'Premier', 'Private / Platinum', 'Not sure'];
 const LEVELS = ['Level 1', 'Level 2', 'Level 3', 'Level 4', 'Level 5', 'Not sure'];
@@ -34,14 +24,19 @@ export default function AddPaymentProfile() {
     reward_level_known: false,
   });
 
-  const selectedBank = BANKS.find(b => b.name === form.bank_name);
+  const { data: bankProgrammes = [] } = useQuery({
+    queryKey: ['bank-programmes'],
+    queryFn: () => base44.entities.RewardProgramme.filter({ active: true, type: 'bank' }),
+  });
+
+  const selectedBank = bankProgrammes.find(b => b.provider === form.bank_name);
 
   const handleBankChange = (val) => {
-    const bank = BANKS.find(b => b.name === val);
+    const bank = bankProgrammes.find(b => b.provider === val);
     setForm(prev => ({
       ...prev,
       bank_name: val,
-      reward_programme: bank?.programme || '',
+      reward_programme: bank?.name || '',
     }));
   };
 
@@ -53,7 +48,7 @@ export default function AddPaymentProfile() {
       ...form,
       reward_level_known: levelKnown,
       initials: selectedBank?.initials || form.bank_name.charAt(0),
-      brand_colour: selectedBank?.colour || '#0B1F3F',
+      brand_colour: selectedBank?.brand_colour || '#0B1F3F',
       confidence_level: levelKnown ? 'Medium' : 'Low',
       nickname: `${form.bank_name} ${form.product_tier || ''}`.trim(),
     });
@@ -82,7 +77,7 @@ export default function AddPaymentProfile() {
             <Select value={form.bank_name} onValueChange={handleBankChange}>
               <SelectTrigger className="h-12 rounded-2xl"><SelectValue placeholder="Select your bank" /></SelectTrigger>
               <SelectContent>
-                {BANKS.map(b => <SelectItem key={b.name} value={b.name}>{b.name}</SelectItem>)}
+                {bankProgrammes.map(b => <SelectItem key={b.id} value={b.provider}>{b.provider}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
