@@ -33,18 +33,18 @@ export default function GoodDollarAnalytics() {
         return;
       }
 
-      // Fetch all GoodDollar profiles
-      const profiles = await base44.asServiceRole.entities.GoodDollarProfile.filter({});
+      // Fetch all GoodDollar profiles (admin can see all)
+      const profiles = await base44.entities.GoodDollarProfile.filter({});
       console.log('Loaded profiles:', profiles.length);
       
       // Fetch all G$ events
-      const events = await base44.asServiceRole.entities.EstimatedValueEvent.filter({ 
+      const events = await base44.entities.EstimatedValueEvent.filter({ 
         g_reward_amount: { $gt: 0 }
       }, '-created_date', 1000);
       console.log('Loaded events:', events.length);
 
       // Fetch campaign participations
-      const participations = await base44.asServiceRole.entities.CampaignParticipation.filter({});
+      const participations = await base44.entities.CampaignParticipation.filter({});
       console.log('Loaded participations:', participations.length);
 
       // Calculate metrics
