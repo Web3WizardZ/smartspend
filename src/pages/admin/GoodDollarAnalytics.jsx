@@ -8,6 +8,7 @@ import AppHeader from '@/components/shared/AppHeader';
 export default function GoodDollarAnalytics() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
@@ -34,14 +35,17 @@ export default function GoodDollarAnalytics() {
 
       // Fetch all GoodDollar profiles
       const profiles = await base44.asServiceRole.entities.GoodDollarProfile.filter({});
+      console.log('Loaded profiles:', profiles.length);
       
       // Fetch all G$ events
       const events = await base44.asServiceRole.entities.EstimatedValueEvent.filter({ 
         g_reward_amount: { $gt: 0 }
       }, '-created_date', 1000);
+      console.log('Loaded events:', events.length);
 
       // Fetch campaign participations
       const participations = await base44.asServiceRole.entities.CampaignParticipation.filter({});
+      console.log('Loaded participations:', participations.length);
 
       // Calculate metrics
       const totalUsers = profiles.length;
@@ -56,19 +60,10 @@ export default function GoodDollarAnalytics() {
       const activeCampaigns = participations.filter(p => p.status === 'in_progress').length;
       const completedCampaigns = participations.filter(p => p.status === 'completed' || p.status === 'reward_claimed').length;
       
-      // Country breakdown
-      const countryBreakdown = {};
-      profiles.forEach(p => {
-        // Get user's country from their events or profile
-        const userEvents = events.filter(e => e.created_by_id === p.user_id);
-        const topCategory = userEvents.length > 0 ? 
-          userEvents.reduce((a, b) => {
-            const count = userEvents.filter(e => e.category === a).length;
-            const bCount = userEvents.filter(e => e.category === b).length;
-            return count > bCount ? a : b;
-          }) : 'Unknown';
-        
-        countryBreakdown[topCategory] = (countryBreakdown[topCategory] || 0) + 1;
+      // Category breakdown (top spending categories)
+      const categoryBreakdown = {};
+      events.forEach(e => {
+        categoryBreakdown[e.category] = (categoryBreakdown[e.category] || 0) + 1;
       });
 
       // Recent activity (last 7 days)
@@ -89,11 +84,12 @@ export default function GoodDollarAnalytics() {
         completedCampaigns,
         recentGEarned,
         recentActions: recentEvents.length,
-        countryBreakdown,
+        categoryBreakdown,
         totalCampaignParticipants: participations.length,
       });
     } catch (e) {
       console.error('Failed to load analytics:', e);
+      setError(e.message || 'Failed to load analytics');
     } finally {
       setLoading(false);
     }
@@ -102,15 +98,47 @@ export default function GoodDollarAnalytics() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <AppHeader title="GoodDollar Analytics" />
+        <AppHeader title="GoodDollar Analytics" showBack />
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+            <p className="text-sm text-muted-foreground">Loading analytics...</p>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!stats) return null;
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader title="GoodDollar Analytics" showBack />
+        <div className="max-w-lg mx-auto px-6 pt-6">
+          <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 text-center">
+            <p className="text-sm font-semibold text-destructive mb-2">Failed to Load Analytics</p>
+            <p className="text-xs text-muted-foreground mb-4">{error}</p>
+            <Button onClick={loadAnalytics} className="h-10 rounded-xl text-sm">
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!stats || stats.totalUsers === 0) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AppHeader title="GoodDollar Analytics" showBack />
+        <div className="max-w-lg mx-auto px-6 pt-6">
+          <div className="bg-white border border-border rounded-2xl p-6 text-center">
+            <p className="text-sm font-semibold text-foreground mb-2">No Data Available</p>
+            <p className="text-xs text-muted-foreground">No GoodDollar profiles have been connected yet.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pb-8">
