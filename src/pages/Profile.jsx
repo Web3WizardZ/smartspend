@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { UserCircle, Shield, Bell, LogOut, Crown, ChevronRight, Zap } from 'lucide-react';
+import { UserCircle, Shield, Bell, LogOut, Crown, ChevronRight, Zap, Copy, ExternalLink } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
 import { useNavigate } from 'react-router-dom';
 import { useGoodDollar } from '@/context/GoodDollarContext';
@@ -83,6 +83,43 @@ export default function Profile() {
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </div>
+
+        {/* Celo Wallet */}
+        {profile?.wallet_address && (
+          <div className="bg-white rounded-2xl border border-border p-4 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-bold text-foreground">Celo Wallet</p>
+              <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                profile.celo_network_status === 'connected' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
+              }`}>
+                {profile.celo_network_status === 'connected' ? '● Connected' : '● Disconnected'}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mb-1">Wallet address</p>
+            <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-3 py-2">
+              <span className="text-xs font-mono text-foreground flex-1 truncate">{profile.wallet_address}</span>
+              <button
+                onClick={() => navigator.clipboard.writeText(profile.wallet_address)}
+                className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors"
+                title="Copy address"
+              >
+                <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+              <a
+                href={`https://celoscan.io/address/${profile.wallet_address}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-shrink-0 p-1 rounded hover:bg-muted transition-colors"
+                title="View on Celoscan"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-primary" />
+              </a>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Celo Mainnet · {profile.wallet_type === 'embedded' ? 'SmartSpend embedded wallet' : 'External wallet'}
+            </p>
+          </div>
+        )}
 
         {/* SmartSpend+ */}
         <button
