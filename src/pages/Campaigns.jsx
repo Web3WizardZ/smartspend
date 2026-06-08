@@ -5,6 +5,7 @@ import { base44 } from '@/api/base44Client';
 import { Users, Zap, CheckCircle2, Trophy, ArrowRight } from 'lucide-react';
 import CampaignProgressCircle from '@/components/campaigns/CampaignProgressCircle';
 import CampaignMilestoneWidget from '@/components/campaigns/CampaignMilestoneWidget';
+import MilestoneNudgeBanner from '@/components/campaigns/MilestoneNudgeBanner';
 import { Button } from '@/components/ui/button';
 import AppHeader from '@/components/shared/AppHeader';
 import { useGoodDollar } from '@/context/GoodDollarContext';
@@ -103,6 +104,11 @@ export default function Campaigns() {
             </button>
           )}
         </div>
+
+        {/* Milestone nudge banner — shown when 1-2 actions from next milestone */}
+        {participations.length > 0 && (
+          <MilestoneNudgeBanner participations={participations} campaigns={campaigns} />
+        )}
 
         {/* Milestone progress widget */}
         {userId && <CampaignMilestoneWidget userId={userId} />}
