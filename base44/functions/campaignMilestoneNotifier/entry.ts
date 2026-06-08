@@ -1,8 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 const MILESTONES = [5, 10, 25, 50, 100];
+const APP_URL = 'https://app.base44.com/apps/68326b8d12f48db726fba553'; // update with your published domain
 
-// Returns the next milestone above current count
 function getNextMilestone(count) {
   return MILESTONES.find(m => m > count) || null;
 }
@@ -10,13 +10,12 @@ function getNextMilestone(count) {
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
 
-  // This is a scheduled/admin function — verify admin or service context
+  // Allow scheduled/entity automations (no user) and admin users; block regular users
   const user = await base44.auth.me().catch(() => null);
   if (user && user.role !== 'admin') {
     return Response.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  // Fetch all active participations
   const participations = await base44.asServiceRole.entities.CampaignParticipation.list();
   const campaigns = await base44.asServiceRole.entities.Campaign.filter({ active: true });
   const users = await base44.asServiceRole.entities.User.list();
@@ -30,19 +29,23 @@ Deno.serve(async (req) => {
   for (const participation of participations) {
     const count = participation.actions_completed || 0;
     const nextMilestone = getNextMilestone(count);
-    if (!nextMilestone) continue; // already hit max milestone
+    if (!nextMilestone) continue;
 
     const actionsNeeded = nextMilestone - count;
-
-    // Only notify when user is exactly 1 or 2 actions away
     if (actionsNeeded > 2) continue;
+
+    // Debounce: skip if we already notified at this exact count
+    if (participation.last_milestone_notified_count === count) {
+      skipped.push({ reason: 'already_notified_at_this_count', userId: participation.user_id });
+      continue;
+    }
 
     const campaign = campaignMap[participation.campaign_id];
     if (!campaign) continue;
 
     const appUser = userMap[participation.user_id];
     if (!appUser?.email) {
-      skipped.push(participation.user_id);
+      skipped.push({ reason: 'no_email', userId: participation.user_id });
       continue;
     }
 
@@ -61,7 +64,7 @@ You're so close! You only need <strong>${actionsNeeded} more action${actionsNeed
 <strong>Potential G$ reward:</strong> G$ ${rewardG}
 
 Complete your next action now to unlock your reward:
-👉 <a href="https://smartspend.app/campaigns">View your campaigns</a>
+👉 <a href="${APP_URL}/campaigns">View your campaigns</a>
 
 Keep up the great work!
 
@@ -73,6 +76,12 @@ Keep up the great work!
       subject,
       body,
       from_name: 'SmartSpend',
+    });
+
+    // Mark this count as notified to prevent duplicate sends
+    await base44.asServiceRole.entities.CampaignParticipation.update(participation.id, {
+      last_milestone_notified_at: new Date().toISOString(),
+      last_milestone_notified_count: count,
     });
 
     notified.push({ userId: appUser.id, email: appUser.email, campaign: campaign.name, actionsNeeded, nextMilestone });

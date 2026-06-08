@@ -39,6 +39,14 @@
     },
     "completed_at": {
       "type": "string"
+    },
+    "last_milestone_notified_at": {
+      "type": "string",
+      "description": "ISO timestamp of the last milestone nudge email sent, used to debounce notifications"
+    },
+    "last_milestone_notified_count": {
+      "type": "number",
+      "description": "The actions_completed value at the time of the last notification, prevents duplicate sends for same milestone"
     }
   },
   "required": [
