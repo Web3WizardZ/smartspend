@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Users, Zap, CheckCircle2, Trophy, ArrowRight } from 'lucide-react';
 import CampaignProgressCircle from '@/components/campaigns/CampaignProgressCircle';
+import CampaignGuideChat from '@/components/campaigns/CampaignGuideChat';
 import CampaignMilestoneWidget from '@/components/campaigns/CampaignMilestoneWidget';
 import MilestoneNudgeBanner from '@/components/campaigns/MilestoneNudgeBanner';
 import { Button } from '@/components/ui/button';
@@ -226,6 +227,9 @@ export default function Campaigns() {
           G$ rewards require GoodDollar Rewards activation and identity verification. Estimates only.
         </p>
       </div>
+
+      {/* Floating campaign guide agent */}
+      <CampaignGuideChat />
     </div>
   );
 }
