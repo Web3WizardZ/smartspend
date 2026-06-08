@@ -9,6 +9,7 @@ import GBoostBanner from '../components/gooddollar/GBoostBanner';
 import GuestFeedbackPopup, { useGuestFeedbackTrigger } from '../components/gooddollar/GuestFeedbackPopup';
 import CountryPicker from '../components/spend/CountryPicker';
 import { useCountry, COUNTRIES } from '@/context/CountryContext';
+import RewardsStrategyChat from '@/components/spend/RewardsStrategyChat';
 
 const LOGO_URL = "https://media.base44.com/images/public/user_69ea57333f824d48a1afdd12/e7314e200_image.png";
 
@@ -165,6 +166,7 @@ export default function Spend() {
           </div>
         </div>
       )}
+      <RewardsStrategyChat />
     </div>
   );
 }
