@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Check, ChevronDown, ChevronUp, Info, AlertCircle } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 import AppHeader from '../components/shared/AppHeader';
 import Disclaimer from '../components/shared/Disclaimer';
 import LogoAvatar from '../components/shared/LogoAvatar';
@@ -19,6 +20,7 @@ export default function Result() {
   const amountBand = urlParams.get('amount_band');
 
   const { profile, isActivated } = useGoodDollar();
+  const { toast } = useToast();
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -98,6 +100,10 @@ export default function Result() {
       }
     }
     base44.analytics.track({ eventName: 'used_combo_clicked', properties: { retailer_name: retailerName, amount, estimated_value: result?.estimated_value, g_reward_amount: gAmount } });
+    toast({
+      title: gAmount > 0 ? `+G$ ${gAmount} earned!` : 'Combo tracked ✓',
+      description: gAmount > 0 ? 'G$ reward added to your GoodDollar balance.' : 'Your spend has been logged to Savings.',
+    });
   };
 
   if (loading) {

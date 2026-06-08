@@ -87,7 +87,7 @@ export default function Savings() {
               <HighlightCard icon={<ShoppingBag className="w-4 h-4 text-primary" />} label="Top category" value={topCategory || '—'} />
               <HighlightCard icon={<Barcode className="w-4 h-4 text-primary" />} label="Top loyalty card" value={topLoyalty || '—'} />
               <HighlightCard icon={<CreditCard className="w-4 h-4 text-primary" />} label="Top payment profile" value={topPayment || '—'} />
-              <HighlightCard icon={<TrendingUp className="w-4 h-4 text-primary" />} label="Best category" value={topCategory || '—'} />
+              <HighlightCard icon={<TrendingUp className="w-4 h-4 text-primary" />} label="Tracked purchases" value={events.length.toString()} />
             </div>
 
             {/* Recent activity */}

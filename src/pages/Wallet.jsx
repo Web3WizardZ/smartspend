@@ -14,7 +14,7 @@ export default function Wallet() {
   const urlParams = new URLSearchParams(window.location.search);
   const initialTab = urlParams.get('tab') === 'loyalty' ? 'loyalty' : urlParams.get('tab') === 'gooddollar' ? 'gooddollar' : 'payment';
   const [tab, setTab] = useState(initialTab);
-  const { isActivated, activate, activating } = useGoodDollar();
+  const { isActivated } = useGoodDollar();
   const [isAuth, setIsAuth] = useState(false);
   const [checking, setChecking] = useState(true);
 
@@ -113,7 +113,7 @@ export default function Wallet() {
 
         {tab === 'gooddollar' && (
           <div className="space-y-4">
-            <GoodDollarActivationCard onActivate={activate} />
+            <GoodDollarActivationCard onActivate={() => navigate('/gooddollar-activation')} />
             {isActivated && (
               <Button
                 variant="outline"

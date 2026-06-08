@@ -1,4 +1,4 @@
-import { createClientFromRequest } from 'npm:@base44/sdk@0.8.25';
+import { createClientFromRequest } from 'npm:@base44/sdk@0.8.31';
 
 Deno.serve(async (req) => {
   const base44 = createClientFromRequest(req);
@@ -162,8 +162,13 @@ Deno.serve(async (req) => {
 });
 
 function getProgrammeType(name) {
-  const loyaltyNames = ["Checkers Xtra Savings", "Smart Shopper", "Woolworths Rewards", "Clicks ClubCard", "Dis-Chem Benefit"];
-  return loyaltyNames.includes(name) ? "loyalty" : "bank";
+  // Retailer/loyalty programmes — not bank-issued
+  const loyaltyKeywords = ["Xtra Savings", "Smart Shopper", "WRewards", "ClubCard", "Benefit", "Xpress", "Ster-Kinekor", "Dis-Chem", "Clicks"];
+  const bankKeywords = ["eBucks", "Discovery Miles", "Absa Rewards", "UCount", "Greenbacks", "Live Better", "Investec Rewards", "Multiply", "Momentum"];
+  if (bankKeywords.some(k => name.includes(k))) return "bank";
+  if (loyaltyKeywords.some(k => name.includes(k))) return "loyalty";
+  // Fallback: if provider is a known bank programme treat as bank, else loyalty
+  return "loyalty";
 }
 
 function getOverallConfidence(bankConf, loyaltyConf, levelKnown) {
