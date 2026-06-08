@@ -142,13 +142,18 @@ function NoAccountGuide({ onBack }) {
 export default function GoodDollarActivation() {
   const navigate = useNavigate();
   const { isActivated, linking, connectAddress, profile, shortAddress, sync, syncing } = useGoodDollar();
-  const [view, setView] = useState('main'); // 'main' | 'connect' | 'no-account' | 'verifying' | 'success' | 'error'
+  const [view, setView] = useState('main'); // 'main' | 'connect' | 'no-account'
   const [address, setAddress] = useState('');
   const [verifyStatus, setVerifyStatus] = useState(null); // null | 'verified' | 'unverified'
   const [linkError, setLinkError] = useState('');
+  const [isAuth, setIsAuth] = useState(null); // null = checking
 
-  // Already connected — show dashboard
-  if (isActivated) {
+  React.useEffect(() => {
+    base44.auth.isAuthenticated().then(setIsAuth);
+  }, []);
+
+  // Already connected — show dashboard (handles both pre-existing and just-connected state)
+  if (isActivated && profile) {
     return <ConnectedDashboard profile={profile} shortAddress={shortAddress} syncing={syncing} onSync={sync} navigate={navigate} />;
   }
 
@@ -160,7 +165,6 @@ export default function GoodDollarActivation() {
     setAddress(val);
     setVerifyStatus(null);
     if (val.trim().length === 42 && val.trim().startsWith('0x')) {
-      // Quick identity pre-check
       try {
         const { getIdentityStatus } = await import('@/services/goodDollarService');
         const status = await getIdentityStatus(val.trim());
@@ -175,7 +179,8 @@ export default function GoodDollarActivation() {
     setLinkError('');
     try {
       await connectAddress(address.trim());
-      setView('success');
+      // Profile is now set in context — isActivated will become true and the
+      // top-level guard above will render ConnectedDashboard with fresh data.
     } catch (e) {
       if (e.message?.includes('sign in')) {
         base44.auth.redirectToLogin(window.location.pathname);
@@ -184,12 +189,6 @@ export default function GoodDollarActivation() {
       }
     }
   };
-
-  if (view === 'success') {
-    return (
-      <ConnectedDashboard profile={profile} shortAddress={shortAddress} syncing={syncing} onSync={sync} navigate={navigate} />
-    );
-  }
 
   if (view === 'connect') {
     return (
@@ -280,12 +279,13 @@ export default function GoodDollarActivation() {
           ))}
         </div>
 
-        {/* Primary CTA: connect existing */}
+        {/* Primary CTA: connect existing — require sign-in first */}
         <Button
           className="w-full h-14 rounded-2xl text-base font-bold mb-3"
-          onClick={() => setView('connect')}
+          onClick={() => isAuth ? setView('connect') : base44.auth.redirectToLogin(window.location.pathname)}
         >
-          <Shield className="w-5 h-5 mr-2" /> Connect my verified G$ account
+          <Shield className="w-5 h-5 mr-2" />
+          {isAuth === false ? 'Sign in to connect G$ account' : 'Connect my verified G$ account'}
         </Button>
 
         {/* Secondary CTA: no account */}
