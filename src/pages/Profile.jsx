@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { UserCircle, Shield, Bell, LogOut, Crown, ChevronRight, Zap, Copy, ExternalLink } from 'lucide-react';
+import { UserCircle, LogOut, Crown, ChevronRight, Zap, Copy, ExternalLink } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
 import { useNavigate } from 'react-router-dom';
 import { useGoodDollar } from '@/context/GoodDollarContext';
+import AchievementBadges from '@/components/profile/AchievementBadges';
 
 const LOGO_URL = "https://media.base44.com/images/public/user_69ea57333f824d48a1afdd12/e7314e200_image.png";
 
@@ -120,6 +121,9 @@ export default function Profile() {
             </p>
           </div>
         )}
+
+        {/* Achievement Badges */}
+        <AchievementBadges />
 
         {/* SmartSpend+ */}
         <button

@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { TrendingUp, ShoppingBag, CreditCard, Barcode, Zap } from 'lucide-react';
 import AppHeader from '../components/shared/AppHeader';
 import CategoryMastery from '@/components/savings/CategoryMastery';
+import StreakCounter from '@/components/savings/StreakCounter';
+import GLeaderboard from '@/components/savings/GLeaderboard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useGoodDollar } from '@/context/GoodDollarContext';
@@ -13,10 +15,15 @@ export default function Savings() {
   const { isActivated, profile } = useGoodDollar();
   const [isAuth, setIsAuth] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     base44.auth.isAuthenticated().then(a => { setIsAuth(a); setChecking(false); });
   }, []);
+
+  useEffect(() => {
+    if (isAuth) base44.auth.me().then(u => setUserId(u?.id)).catch(() => {});
+  }, [isAuth]);
 
   const { data: events = [] } = useQuery({
     queryKey: ['value-events'],
@@ -78,8 +85,14 @@ export default function Savings() {
           </div>
         )}
 
+        {/* Streak Counter */}
+        <StreakCounter events={events} />
+
         {/* Category Mastery */}
         {events.length > 0 && <CategoryMastery events={events} />}
+
+        {/* G$ Leaderboard */}
+        {isActivated && <GLeaderboard currentUserId={userId} />}
 
         {/* Highlights */}
         {events.length > 0 && (
