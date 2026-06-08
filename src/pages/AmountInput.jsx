@@ -44,7 +44,7 @@ export default function AmountInput() {
     const numAmount = parseFloat(amount);
     if (!numAmount || numAmount <= 0) return;
     const band = getAmountBand(numAmount);
-    navigate(`/result?retailer_id=${retailerId}&retailer_name=${encodeURIComponent(retailerName)}&category=${encodeURIComponent(category)}&amount=${numAmount}&amount_band=${encodeURIComponent(band)}`);
+    navigate(`/result?retailer_id=${retailerId}&retailer_name=${encodeURIComponent(retailerName)}&category=${encodeURIComponent(category)}&amount=${numAmount}&amount_band=${encodeURIComponent(band)}&country=${country || ''}`);
     
     base44.analytics.track({
       eventName: 'amount_entered',

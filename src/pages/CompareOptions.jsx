@@ -10,13 +10,15 @@ import { useCountry } from '@/context/CountryContext';
 
 export default function CompareOptions() {
   const navigate = useNavigate();
-  const { country } = useCountry();
-  const currencySymbol = getCurrencySymbol(country);
+  const { country: ctxCountry } = useCountry();
   const urlParams = new URLSearchParams(window.location.search);
   const retailerId = urlParams.get('retailer_id');
   const retailerName = urlParams.get('retailer_name');
   const category = urlParams.get('category');
   const amount = parseFloat(urlParams.get('amount'));
+  // Prefer country from URL to avoid context hydration race
+  const country = urlParams.get('country') || ctxCountry;
+  const currencySymbol = getCurrencySymbol(country);
 
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -22,7 +22,9 @@ export default function Result() {
   const amountBand = urlParams.get('amount_band');
 
   const { profile, isActivated } = useGoodDollar();
-  const { country } = useCountry();
+  const { country: ctxCountry } = useCountry();
+  // Prefer country from URL (passed by AmountInput) to avoid context hydration race
+  const country = urlParams.get('country') || ctxCountry;
   const currencySymbol = getCurrencySymbol(country);
   const { toast } = useToast();
 
@@ -238,7 +240,7 @@ export default function Result() {
               <Button
                 variant="outline"
                 className="h-12 rounded-2xl text-sm font-semibold"
-                onClick={() => navigate(`/compare-options?retailer_id=${retailerId}&retailer_name=${encodeURIComponent(retailerName)}&category=${encodeURIComponent(category)}&amount=${amount}`)}
+                onClick={() => navigate(`/compare-options?retailer_id=${retailerId}&retailer_name=${encodeURIComponent(retailerName)}&category=${encodeURIComponent(category)}&amount=${amount}&country=${country || ''}`)}
               >
                 Compare options
               </Button>
