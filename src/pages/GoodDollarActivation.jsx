@@ -87,6 +87,19 @@ function ConnectedDashboard({ profile, shortAddress, syncing, onSync, navigate }
           </div>
         </div>
 
+        {/* Refresh button */}
+        <div className="mb-4">
+          <Button
+            variant="outline"
+            className="w-full h-12 rounded-2xl text-sm"
+            onClick={handleRefreshStatus}
+            disabled={refreshing}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Refreshing status...' : 'Refresh Verification Status'}
+          </Button>
+        </div>
+
         {/* CTAs */}
         <div className="grid grid-cols-2 gap-3">
           <Button className="h-12 rounded-2xl text-sm" onClick={() => navigate('/campaigns')}>
