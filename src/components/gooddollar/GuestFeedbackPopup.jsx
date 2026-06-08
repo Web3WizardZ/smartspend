@@ -5,19 +5,20 @@ import { Button } from '@/components/ui/button';
 import { base44 } from '@/api/base44Client';
 
 const STORAGE_KEY = 'smartspend_guest_feedback_seen';
+// Use sessionStorage so the popup can reappear in a new session, but only once per session
 
 export function useGuestFeedbackTrigger() {
   const [show, setShow] = React.useState(false);
 
   const trigger = React.useCallback(async () => {
-    if (localStorage.getItem(STORAGE_KEY)) return;
+    if (sessionStorage.getItem(STORAGE_KEY)) return;
     const authed = await base44.auth.isAuthenticated();
     if (authed) return; // Only show to guests
     setShow(true);
   }, []);
 
   const dismiss = React.useCallback(() => {
-    localStorage.setItem(STORAGE_KEY, 'true');
+    sessionStorage.setItem(STORAGE_KEY, 'true');
     setShow(false);
   }, []);
 
@@ -29,13 +30,13 @@ export default function GuestFeedbackPopup({ onDismiss }) {
 
   const handleSignUp = () => {
     base44.analytics.track({ eventName: 'guest_feedback_signup_clicked' });
-    localStorage.setItem(STORAGE_KEY, 'true');
+    sessionStorage.setItem(STORAGE_KEY, 'true');
     navigate('/register');
   };
 
   const handleStillExploring = () => {
     base44.analytics.track({ eventName: 'guest_feedback_still_exploring' });
-    localStorage.setItem(STORAGE_KEY, 'true');
+    sessionStorage.setItem(STORAGE_KEY, 'true');
     onDismiss();
   };
 

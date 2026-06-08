@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 import { Users, Zap, CheckCircle2, Trophy, ArrowRight } from 'lucide-react';
 import CampaignProgressCircle from '@/components/campaigns/CampaignProgressCircle';
+import CampaignMilestoneWidget from '@/components/campaigns/CampaignMilestoneWidget';
 import { Button } from '@/components/ui/button';
 import AppHeader from '@/components/shared/AppHeader';
 import { useGoodDollar } from '@/context/GoodDollarContext';
@@ -102,6 +103,9 @@ export default function Campaigns() {
             </button>
           )}
         </div>
+
+        {/* Milestone progress widget */}
+        {userId && <CampaignMilestoneWidget userId={userId} />}
 
         {isLoading ? (
           <div className="space-y-3">
