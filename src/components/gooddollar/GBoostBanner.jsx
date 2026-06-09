@@ -15,7 +15,7 @@ export default function GBoostBanner() {
     return (
       <div
         className="flex items-center gap-3 bg-primary/5 border border-primary/15 rounded-2xl px-4 py-3 cursor-pointer hover:bg-primary/8 transition-colors"
-        onClick={() => navigate('/wallet?tab=gooddollar')}
+        onClick={() => navigate('/wallet?tab=gooddollars')}
       >
         <div className="w-8 h-8 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
           <Zap className="w-4 h-4 text-primary" />
