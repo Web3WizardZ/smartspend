@@ -15,6 +15,7 @@ import Wallet from './pages/Wallet';
 import AddPaymentProfile from './pages/AddPaymentProfile';
 import AddLoyaltyCard from './pages/AddLoyaltyCard';
 import Savings from './pages/Savings';
+import Welcome from './pages/Welcome';
 import Compare from './pages/Compare';
 import Profile from './pages/Profile';
 import SmartSpendPlus from './pages/SmartSpendPlus';
@@ -72,6 +73,7 @@ const AuthenticatedApp = () => {
       <Route path="/add-loyalty-card" element={<AddLoyaltyCard />} />
       <Route path="/smartspend-plus" element={<SmartSpendPlus />} />
       <Route path="/gooddollar-activation" element={<GoodDollarActivation />} />
+        <Route path="/welcome" element={<Welcome />} />
       <Route path="/campaigns" element={<Campaigns />} />
 
       {/* Admin */}
